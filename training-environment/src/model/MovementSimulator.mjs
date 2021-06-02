@@ -1,0 +1,48 @@
+import { CONFIG } from "../config.mjs";
+import { Agent } from "./Agent.mjs";
+
+const {CANVAS_HEIGHT} = CONFIG;
+
+export class MovementSimulator {
+    static simulateMovement = (cars, setSpeed, speed) => {
+        for(let i = 0; i < cars.length; i++) {
+            const currentCar = cars[i];
+            if(currentCar instanceof Agent) {
+                const agent = currentCar;
+                agent.scanForCars(cars);
+
+                this.adjustSpeed(agent, speed, setSpeed);
+            } else {
+                currentCar.scanForCars(cars);
+
+                currentCar.move(speed);
+            }
+        }
+    }
+
+    static adjustSpeed = (agent, speed, setSpeed) => {
+        const acl = agent.acl;
+
+        const speedAdjuster = speed => speed * acl;
+        setSpeed(speedAdjuster(speed));
+
+        const carInFront = agent.frontSensor.safetyZoneActive;
+        if(carInFront) {
+            agent.carInFront.speedAdjuster = speedAdjuster;
+        }
+
+        const carCrashed = agent.collisionSensor.safetyZoneActive;
+        if(carCrashed) {
+            setSpeed(0);
+        }
+    }
+
+    static removeCarsOutOfSight = (cars) => {
+        return cars.filter(this.carOutOfSight);
+    }
+
+    static carOutOfSight = (currentCar) => {
+        return currentCar.position.y < CANVAS_HEIGHT;
+    }
+    
+}
