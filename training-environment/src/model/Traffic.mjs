@@ -3,7 +3,7 @@ import { CarCreator } from "./CarCreator.mjs";
 import { LaneCreator } from "./LaneCreator.mjs";
 import {CONFIG} from "../config.mjs";
 
-const {MAX_SPEED} = CONFIG;
+const {MAX_SPEED, NO_PASSED_CARS_TIME_LIMIT} = CONFIG;
 
 export class Traffic {
     constructor(changeSpeed, updatePassedCars) {
@@ -16,6 +16,9 @@ export class Traffic {
         this.updateSpeedState = changeSpeed;
         this.updatePassedCarsState = updatePassedCars;
         this.speed = 1;
+        this.crashed = false;
+        this.passedCars = 0;
+        this.noPassedCarsTimeLimit = NO_PASSED_CARS_TIME_LIMIT;
     }
 
     changeSpeed = (speed) => {
@@ -30,14 +33,18 @@ export class Traffic {
     }
 
     simulate = () => {
-        this.createCars();
-        this.moveCars();
-        this.removePassedCars();
+        if(this.agent.collisionSensor.safetyZoneActive || --this.noPassedCarsTimeLimit <= 0) {
+            this.crashed = true;
+        }
+        if(!this.crashed) {
+            this.createCars();
+            this.moveCars();
+            this.removePassedCars();
+        }
     }
 
     createCars = () => {
-        const carMovingFast = this.speed >= MAX_SPEED * 0.4;
-        carMovingFast && this.carCreator.createCars(this.lanes, this.cars);
+        this.carCreator.createCars(this.lanes, this.cars);
     }
 
     moveCars = () => {
@@ -50,5 +57,7 @@ export class Traffic {
         const currentCarNum = this.cars.length;
         const removedCars = previousCarNum - currentCarNum;
         this.updatePassedCarsState(removedCars);
+        this.passedCars += removedCars;
+        this.noPassedCarsTimeLimit = NO_PASSED_CARS_TIME_LIMIT;
     }
 }

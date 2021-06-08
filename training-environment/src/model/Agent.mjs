@@ -21,6 +21,7 @@ export class Agent extends Car {
         this.rightSideSensor = new RightSideSensor(this.position);
         this.collisionSensor = new CollisionSensor(this.position);
 
+        this.isAgent = true;
         this.carInFront = null;
     }
 
@@ -34,6 +35,7 @@ export class Agent extends Car {
         const rightSideDistance = this.rightSideSensor.getNormalizedDistance();
         
         return [
+            // this.acl - 1,
             frontSafetyActive,
             frontDistance,
             leftSideSafetyActive,
@@ -84,7 +86,7 @@ export class Agent extends Car {
     }
 
     animateLaneChange = async (oldPosition, newPosition) => {
-        const frames = 60;
+        const frames = 20;
         this.transitioning = true;
         for(let i = 0; i <= frames; i++) {
             const delta = i / frames;

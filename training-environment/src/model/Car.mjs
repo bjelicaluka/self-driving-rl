@@ -10,7 +10,6 @@ export class Car {
         this.size = new Size(CAR_WIDTH, CAR_HEIGHT);
         this.position = new Position(lane.position.x, -100);
         this.lane = lane;
-        this.lane.speed = null
         this.direction = 1;
         this.speed = null;
         this.carIndex = 0;
@@ -19,11 +18,12 @@ export class Car {
     }
 
     move = (speed) => {
-        if(this.lane.speed === null)
-            this.lane.speed = speed;
+        if(this.speed === null)
+            this.speed = speed;
         if(this.active) {
-            this.lane.speed = this.speedAdjuster(this.lane.speed + this.lane.speedOffset * 0.1);
-            this.position.addY(this.lane.speed * this.direction);
+            this.speed = this.speedAdjuster(this.speed);
+            this.position.addY(this.speed * this.direction * (1 + this.lane.speedOffset))
+            this.updatePosition(this.position);
         }
     }
 
@@ -34,5 +34,9 @@ export class Car {
         } else {
             this.active = true;
         }
+    }
+
+    updatePosition = (newPosition) => {
+        this.position = newPosition;
     }
 }

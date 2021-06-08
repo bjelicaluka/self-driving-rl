@@ -16,7 +16,10 @@ export class CarCreator {
         if(timeToCreateCar) {
             const arr = [];
             while(arr.length < CARS_TO_CREATE){
-                const randomLaneNum = Math.floor(Math.random() * lanes.length);
+                const randomNum = Math.random();
+                let randomLaneNum = Math.round((randomNum <= 0.0999 ? 0 : randomNum) * lanes.length);
+                if(randomLaneNum >= lanes.length) 
+                    randomLaneNum = lanes.length-1;
                 if(arr.indexOf(randomLaneNum) === -1) arr.push(randomLaneNum);
             }
             arr.forEach(randomLaneNum => {

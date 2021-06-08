@@ -1,54 +1,40 @@
 import axios from 'axios'
 import {CONFIG} from '../config.mjs'
+import { Feedback } from './Feedback.mjs';
 
 const {API_URL, CALL_FREQUENCY} = CONFIG;
 
 export class AI {
-    static apiCallInterval = null;
+    apiCallInterval = null;
+    previousReward = 0;
 
-    static predict(input) {
+    predict(state) {
         return axios.post(API_URL, {
-            network_name: "self_driving_trained_test",
-            input_array: input
+            state,
+            previous_reward: this.previousReward
         });
     }
 
-    static auto(traffic, automaticMode, setLayers) {
-        if(automaticMode) {
-            this.apiCallInterval = setInterval(() => {
-                !traffic.agent.transitioning && AI.predict(traffic.agent.getSnapshot())
-                .then(resp => {
-                    // const layers = this.parseLayersFromResponse(resp);
-                    // setLayers(layers);
+    auto(traffic) {
+        this.apiCallInterval = setInterval(() => {
+            const input = [
+                ...traffic.agent.getSnapshot()
+            ];
 
-                    const predictedDirection = this.parseDirectionFromResponse(resp);
-                    traffic.agent.changeLane(traffic.lanes, predictedDirection);
-                    traffic.agent.acl = 1.05;
-                })
-                .catch(err => {
-                    console.error(err);
-                });
-            }, CALL_FREQUENCY);
-        } else {
-            this.turnOffAutoMode();
-        }
+            !traffic.agent.transitioning && this.predict(input)
+            .then(resp => {
+                const {action, acceleration} = resp.data;
+                traffic.agent.changeLane(traffic.lanes, action);
+                traffic.agent.acl = parseFloat(acceleration)*0.1 + 1;
+                this.previousReward = Feedback.generateScalarFeedback(traffic);
+            })
+            .catch(err => {
+                console.error(err);
+            });
+        }, CALL_FREQUENCY);
     }
 
-    static parseLayersFromResponse(resp) {
-        const layers = [];
-        for (let i = 0; i < resp.data.prediction.length; i++) {
-            const layer = resp.data.prediction[i];
-            layers.push(layer);
-        }
-        return layers;
-    }
-
-    static parseDirectionFromResponse(resp) {
-        const responseArray = resp.data.prediction[2][0];
-        return responseArray.indexOf(Math.max(...responseArray)) - 1;
-    }
-
-    static turnOffAutoMode() {
+    turnOffAutoMode() {
         clearInterval(this.apiCallInterval);
     }
 }

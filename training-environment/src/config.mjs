@@ -3,7 +3,7 @@ const MAX_SPEED = 2;
 const CARS_TO_CREATE = 3;
 const CAR_CREATION_INTERVAL = 200;
 
-let windowWidth = 800;
+let windowWidth = 947;
 if(windowWidth <= 400) {
     windowWidth *= 0.9;
 } else if(windowWidth >= 400 && windowWidth <= 765) {
@@ -13,8 +13,10 @@ if(windowWidth <= 400) {
 }
 
 export const CONFIG = {
-    API_URL: "http://localhost:3000/predict",
-    CALL_FREQUENCY: 200,
+    API_URL: "http://localhost:4000/predict",
+    HEARTBEAT_URL: "http://localhost:4000/heartbeat",
+    CALL_FREQUENCY: 50,
+    NO_PASSED_CARS_TIME_LIMIT: 1000,
     // Static fields.
     CAR_WIDTH: windowWidth * 0.0375,
     CAR_HEIGHT: windowWidth * 0.0625,

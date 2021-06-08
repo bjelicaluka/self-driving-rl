@@ -23,13 +23,8 @@ export class MovementSimulator {
     static adjustSpeed = (agent, speed, setSpeed) => {
         const acl = agent.acl;
 
-        const speedAdjuster = speed => speed * acl;
+        const speedAdjuster = speed => speed < 0.1 ? speed + acl : speed * acl;
         setSpeed(speedAdjuster(speed));
-
-        const carInFront = agent.frontSensor.safetyZoneActive;
-        if(carInFront) {
-            agent.carInFront.speedAdjuster = speedAdjuster;
-        }
 
         const carCrashed = agent.collisionSensor.safetyZoneActive;
         if(carCrashed) {
