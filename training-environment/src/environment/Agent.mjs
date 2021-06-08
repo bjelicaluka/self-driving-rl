@@ -1,10 +1,10 @@
 import { Car } from "./Car.mjs";
 import { Position } from "./structures/Position.mjs";
 import { sleep } from "../utils/functions.mjs"; 
-import { FrontSensor } from "../sensors/FrontSensor.mjs";
-import { CollisionSensor } from "../sensors/CollisionSensor.mjs";
-import { LeftSideSensor } from "../sensors/LeftSideSensor.mjs";
-import { RightSideSensor } from "../sensors/RightSideSensor.mjs";
+import { FrontSensor } from "./sensors/FrontSensor.mjs";
+import { CollisionSensor } from "./sensors/CollisionSensor.mjs";
+import { LeftSideSensor } from "./sensors/LeftSideSensor.mjs";
+import { RightSideSensor } from "./sensors/RightSideSensor.mjs";
 import {CONFIG} from "../config.mjs";
 
 const {CANVAS_HEIGHT} = CONFIG;

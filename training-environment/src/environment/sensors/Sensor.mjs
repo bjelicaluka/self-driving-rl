@@ -1,5 +1,5 @@
-import { Agent } from "../model/Agent.mjs";
-import { CONFIG } from "../config.mjs";
+import { Agent } from "../Agent.mjs";
+import { CONFIG } from "../../config.mjs";
 
 const {CAR_HEIGHT} = CONFIG;
 const MAX_DISTANCE_POSITION = {x: 0, y: 0};

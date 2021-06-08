@@ -1,5 +1,5 @@
 import { Sensor } from "./Sensor.mjs";
-import { CONFIG } from "../config.mjs";
+import { CONFIG } from "../../config.mjs";
 
 const {CAR_HEIGHT, LANE_WIDTH, NUM_OF_LANES} = CONFIG;
 

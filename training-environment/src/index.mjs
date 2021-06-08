@@ -1,7 +1,7 @@
 import { CONFIG } from './config.mjs';
 import { SocketIOServer } from './events/SocketIOServer.mjs';
-import { AI } from './model/AI.mjs';
-import {Traffic} from './model/Traffic.mjs'
+import { AI } from './environment/AI.mjs';
+import {Traffic} from './environment/Traffic.mjs'
 
 const NUMBER_OF_SIMULATIONS = 1;
 

@@ -2,7 +2,7 @@ import { Car } from "./Car.mjs";
 import { Position } from "./structures/Position.mjs";
 import { sleep } from "../utils/functions.mjs";
 import { CONFIG } from "../config.mjs";
-import { PassingCarFrontSensor } from "../sensors/PassingCarFrontSensor.mjs";
+import { PassingCarFrontSensor } from "./sensors/PassingCarFrontSensor.mjs";
 
 const { CANVAS_HEIGHT } = CONFIG;
 
