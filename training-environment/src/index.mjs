@@ -1,6 +1,6 @@
 import { CONFIG } from './config.mjs';
 import { SocketIOServer } from './events/SocketIOServer.mjs';
-import { AI } from './environment/AI.mjs';
+import { AI } from './AI.mjs';
 import {Traffic} from './environment/Traffic.mjs'
 
 const NUMBER_OF_SIMULATIONS = 1;
@@ -19,17 +19,21 @@ function run() {
   const length = infos.push({...initialInfo});
   const index = length-1;
 
-  const server = new SocketIOServer(index);
-  server.onConnect(() => {
-    server.sendEvent('config', CONFIG);
+  const webSocketServer = new SocketIOServer(index);
+  webSocketServer.onConnect(() => {
+    webSocketServer.sendEvent('config', CONFIG);
   });
   
   let traffic = initTraffic(infos[index]);
-  let ai = new AI();
-  ai.auto(traffic);
+  let ai = new AI(index, traffic);
   
   setInterval(() => {
+    // Run environment
     traffic.simulate();
+    ai.think();
+    webSocketServer.sendEvent('traffic', traffic);
+
+    // Display speed and passed cars
     console.clear();
     let string = infos.map(info => {
       const speedString = "Speed: " + info.speed;
@@ -37,14 +41,17 @@ function run() {
       return `${speedString.padEnd(30, " ")} - ${passedCarsString.padEnd(20, " ")}`;
     }).join('\n');
     console.log(string);
-    server.sendEvent('traffic', traffic);
+
+    // Handle episode end
     if(traffic.crashed) {
+      ai.close();
+
       infos[index] = {...initialInfo};
+      
       traffic = initTraffic(infos[index]);
-      ai.turnOffAutoMode();
-      ai.auto(traffic);
+      ai = new AI(index, traffic);
     }
-  }, 10);
+  }, 1);
 }
 
 for (let i = 0; i < NUMBER_OF_SIMULATIONS; i++) {

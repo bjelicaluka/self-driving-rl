@@ -1,5 +1,5 @@
 from tensorflow.python.ops.gen_math_ops import Mod
-from model import Model
+from src.model import Model
 import pandas
 from os import remove
 

@@ -1,23 +1,34 @@
 import redis from "redis";
 
-const subscriber = redis.createClient({
-  password: '1234'
-});
-const publisher = redis.createClient({
-  password: '1234'
-});
+export class RedisPubSub {
 
+  constructor() {
+    this.subscriber = redis.createClient({
+      password: '1234'
+    });
+    this.publisher = redis.createClient({
+      password: '1234'
+    });
+  }
 
-async function publish() {
-  const action = {
-    action: -1,
-    acceleration: 0.5
-  };
-  publisher.publish("state", JSON.stringify(state));
+  publish(channel, data) {
+    this.publisher.publish(channel, JSON.stringify(data));
+  }
+
+  subscribe(channel, handler) {
+    this.subscriber.on("message", (channel, data) => handler(JSON.parse(data)));
+    this.subscriber.subscribe(channel);
+  }
+
+  close() {
+    this.publisher.quit();
+    this.subscriber.quit();
+  }
+
 }
 
-subscriber.on("message", (channel, data) => {
-  console.log(JSON.parse(data));
-});
 
-subscriber.subscribe("action");
+
+
+
+

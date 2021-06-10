@@ -1,8 +1,6 @@
-from model import Model
-
+from src.model import Model
 
 compile = False
-
 
 def init():
   global model

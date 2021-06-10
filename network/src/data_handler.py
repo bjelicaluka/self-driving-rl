@@ -1,6 +1,6 @@
-from settings import update_model
+from src.settings import update_model
 from threading import Thread
-from train_script import train
+from src.train_script import train
 from uuid import uuid4
 
 def retrain_network(file_name):
