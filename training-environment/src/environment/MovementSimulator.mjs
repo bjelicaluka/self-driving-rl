@@ -1,7 +1,7 @@
 import { CONFIG } from "../config.mjs";
 import { Agent } from "./Agent.mjs";
 
-const {CANVAS_HEIGHT} = CONFIG;
+const {CANVAS_HEIGHT, MAX_SPEED} = CONFIG;
 
 export class MovementSimulator {
     static simulateMovement = (cars, setSpeed, speed) => {
@@ -23,7 +23,7 @@ export class MovementSimulator {
     static adjustSpeed = (agent, speed, setSpeed) => {
         const acl = agent.acl;
 
-        const speedAdjuster = speed => speed < 0.1 ? speed + acl : speed * acl;
+        const speedAdjuster = speed => speed < 0.1 ? speed + acl - 1 : speed * acl;
         setSpeed(speedAdjuster(speed));
 
         const carCrashed = agent.collisionSensor.safetyZoneActive;

@@ -14,7 +14,7 @@ export class Agent extends Car {
     super(lane);
     this.position = new Position(lane.position.x, CANVAS_HEIGHT * 0.875);
     this.speed = 0;
-    this.acl = 1;
+    this.acl = 2;
     this.transitioning = false;
     this.frontSensor = new FrontSensor(this.position);
     this.leftSideSensor = new LeftSideSensor(this.position);
@@ -72,31 +72,24 @@ export class Agent extends Car {
 
   changeLane = (lanes, direction) => {
     const newLaneIndex = this.lane.laneNum + direction;
+    if (direction === -1 && this.leftSideSensor.safetyZoneActive) {
+      this.collisionSensor.safetyZoneActive = true;
+    } else if (direction === 1 && this.rightSideSensor.safetyZoneActive) {
+      this.collisionSensor.safetyZoneActive = true;
+    }
     if (this.canChangeLane(lanes, newLaneIndex)) {
       this.lane = lanes[newLaneIndex]
       const newPosition = new Position(this.lane.position.x, CANVAS_HEIGHT * 0.875);
-      this.animateLaneChange(this.position, newPosition);
+      this.updatePosition(newPosition);
     }
   }
 
   canChangeLane = (lanes, newLaneIndex) => {
     const validLane = lanes[newLaneIndex];
-    return validLane && !this.transitioning;
-  }
-
-  animateLaneChange = async (oldPosition, newPosition) => {
-    const frames = 10;
-    this.transitioning = true;
-    for (let i = 0; i <= frames; i++) {
-      const delta = i / frames;
-      const dX = delta * (newPosition.x - oldPosition.x);
-      const dY = delta * (newPosition.y - oldPosition.y);
-      const deltaPosition = new Position(dX, dY);
-      deltaPosition.add(oldPosition)
-      this.updatePosition(deltaPosition);
-      await sleep(1);
+    if(!validLane) {
+      this.collisionSensor.safetyZoneActive = true;
     }
-    this.transitioning = false;
+    return validLane && !this.transitioning;
   }
 
   updatePosition = (newPosition) => {

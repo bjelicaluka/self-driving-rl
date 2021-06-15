@@ -11,6 +11,8 @@ function initTraffic(info) {
   return new Traffic(speed => info.speed = speed, pc => info.passedCars += pc);
 }
 
+let i = 0;
+
 function run() {
   const initialInfo = {
     speed: 1,
@@ -30,7 +32,7 @@ function run() {
   setInterval(() => {
     // Run environment
     traffic.simulate();
-    ai.think();
+    ai.think() && i++;
     webSocketServer.sendEvent('traffic', traffic);
 
     // Display speed and passed cars
@@ -38,18 +40,19 @@ function run() {
     let string = infos.map(info => {
       const speedString = "Speed: " + info.speed;
       const passedCarsString = "Passed cars: " + info.passedCars;
-      return `${speedString.padEnd(30, " ")} - ${passedCarsString.padEnd(20, " ")}`;
+      return `${speedString.padEnd(30, " ")} - ${passedCarsString.padEnd(20, " ")} ${i + "".padEnd(10)} ${traffic.cars.length}`;
     }).join('\n');
     console.log(string);
 
     // Handle episode end
     if(traffic.crashed) {
-      ai.close();
+      // ai.close();
 
       infos[index] = {...initialInfo};
       
       traffic = initTraffic(infos[index]);
-      ai = new AI(index, traffic);
+      ai.traffic = traffic;
+      // ai = new AI(index, traffic);
     }
   }, 1);
 }

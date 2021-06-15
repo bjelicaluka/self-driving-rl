@@ -18,8 +18,7 @@ export class Car {
     }
 
     move = (speed) => {
-        if(this.speed === null)
-            this.speed = speed;
+        this.speed = speed;
         if(this.active) {
             this.speed = this.speedAdjuster(this.speed);
             this.position.addY(this.speed * this.direction * (1 + this.lane.speedOffset))

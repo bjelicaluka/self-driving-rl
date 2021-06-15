@@ -6,7 +6,7 @@ const {CAR_CREATION_INTERVAL, CARS_TO_CREATE} = CONFIG;
 
 export class CarCreator {
     constructor() {
-        this.carCreationInterval = CAR_CREATION_INTERVAL;
+        this.carCreationInterval = 1;
     }
     
     createCars = (lanes, cars) => {
@@ -40,7 +40,7 @@ export class CarCreator {
     }
 
     createAgent = (lanes, cars) => {
-        const agent = new Agent(lanes[3]);
+        const agent = new Agent(lanes[5]);
         cars.push(agent);
         return agent;
     }
