@@ -3,7 +3,7 @@ import { SocketIOServer } from './events/SocketIOServer.mjs';
 import { AI } from './AI.mjs';
 import {Traffic} from './environment/Traffic.mjs'
 
-const NUMBER_OF_SIMULATIONS = 1;
+const NUMBER_OF_SIMULATIONS = 4;
 
 const infos = [];
 
@@ -32,7 +32,7 @@ function run() {
   setInterval(() => {
     // Run environment
     traffic.simulate();
-    ai.think() && i++;
+    ai.think(traffic.crashed) && i++;
     webSocketServer.sendEvent('traffic', traffic);
 
     // Display speed and passed cars
@@ -46,13 +46,11 @@ function run() {
 
     // Handle episode end
     if(traffic.crashed) {
-      // ai.close();
 
       infos[index] = {...initialInfo};
       
       traffic = initTraffic(infos[index]);
       ai.traffic = traffic;
-      // ai = new AI(index, traffic);
     }
   }, 1);
 }

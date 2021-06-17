@@ -1,59 +1,73 @@
 from tensorflow.keras import Model as KerasModel
 from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import Dense, Input
+from tensorflow.keras.losses import MeanSquaredError
+from tensorflow.keras.optimizers import Adam
+import json
+import numpy as np
+
+from src.pubsub import RedisPubSub
+
 
 class Model(object):
 
-  def __init__(self, id=0) -> None:
-    super().__init__()
-    self.id = id
-    inp= Input(shape=(8, ))
+    def __init__(self, network_id='0') -> None:
+        super().__init__()
+        self.network_id = network_id
+        self.learning_rate = 0.00025
 
-    x = Dense(32, activation='relu')(inp)
-    x = Dense(16, activation='relu')(x)
-    x = Dense(8, activation='relu')(x)
+        state_input = Input(shape=(7,))
 
-    out1 = Dense(1, activation='sigmoid')(x)
+        hidden_for_dir = Dense(16, activation='relu')(state_input)
+        hidden_for_acc = Dense(16, activation='relu')(state_input)
 
-    self._model = KerasModel(inputs=inp, outputs=out1)
+        direction_output = Dense(3, activation='linear')(hidden_for_dir)
+        acceleration_output = Dense(2, activation='linear')(hidden_for_acc)
 
-  def compile(self):
-    self._model.compile(loss=['mean_squared_error', 'mean_squared_error'], optimizer='adam')
-  
-  def fit(self, x, y, epochs=100, batch_size=1):
-    self._model.fit(x, y, epochs=epochs, batch_size=batch_size)
+        self._model = KerasModel(inputs=state_input, outputs=[direction_output, acceleration_output])
 
-  def predict(self, x):
-    return self._model.predict(x)
+    def compile(self):
+        self._model.compile(loss=MeanSquaredError(),
+                            optimizer=Adam(learning_rate=self.learning_rate, clipnorm=1.0),
+                            metrics=['accuracy'])
 
-  def evaluate(self, x, y):
-    return self._model.evaluate(x, y)
+    def fit(self, x, y, epochs=100, batch_size=1, verbose=1):
+        self._model.fit(x, y, epochs=epochs, batch_size=batch_size, verbose=verbose)
 
-  def save(self, path):
-    self._model.save(path)
+    def predict(self, x):
+        return self._model.predict(x)
 
-  def load(self, path):
-    self._model = load_model(path)
+    def evaluate(self, x, y):
+        return self._model.evaluate(x, y)
+
+    def get_weights(self):
+        return self._model.get_weights()
+
+    def set_weights(self, weights):
+        self._model.set_weights(weights)
+
+    def save(self, path):
+        self._model.save(path)
+
+    def load(self, path):
+        self._model = load_model(path)
 
 
 class ModelInstanceProvider(object):
 
-  @staticmethod
-  def init(file_location, new_model=True):
-    global model
-    model = Model()
-    if not new_model:
-      model.load(file_location)
-    else:
-      model.compile()
-      model.save(file_location)
+    @staticmethod
+    def init():
+        global model
+        model = Model()
+        model.compile()
+        pubsub = RedisPubSub()
+        weights = pubsub.publisher.get('weights')
+        if weights is not None:
+            weights = json.loads(weights)
+            weights = [np.array(w) for w in weights]
+            model.set_weights(weights)
 
-  @staticmethod
-  def get_instance():
-    global model
-    return model
-
-  @staticmethod
-  def set_instance(new_model):
-    global model
-    model = new_model
+    @staticmethod
+    def get_instance():
+        global model
+        return model

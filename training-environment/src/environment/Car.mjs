@@ -13,12 +13,14 @@ export class Car {
         this.direction = 1;
         this.speed = null;
         this.carIndex = 0;
+        this.previousSpeed = null;
 
         this.speedAdjuster = speed => speed;
     }
 
     move = (speed) => {
-        this.speed = speed;
+        if(this.speed === null || this.position.y < 0)
+            this.speed = speed;
         if(this.active) {
             this.speed = this.speedAdjuster(this.speed);
             this.position.addY(this.speed * this.direction * (1 + this.lane.speedOffset))

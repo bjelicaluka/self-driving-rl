@@ -1,34 +1,51 @@
-from src.settings import update_model
-from threading import Thread
-from src.train_script import train
-from uuid import uuid4
+from collections import deque
+import numpy as np
+import json
+from src.pubsub import RedisPubSub
 
-def retrain_network(file_name):
-    update_model(train(file_name))
 
-class DataHandler(object):
-    def __init__(self):
+class DataBuffer(object):
+    def __init__(self, local=True):
         super().__init__()
-        self._data_num = 1
-        self._training_sample_batch_id = str(uuid4())
-        self._training_sample_batch_size = 50
-        self._previous_data_string = ""
+        self._sample = None
+        self._buffer_size = 5000
+        self._local = local
+        self._pubsub = RedisPubSub() if not self._local else None
 
-    def update_data(self, state):
-        self._previous_data_string = ",".join([f"{x[0]}" for x in state])
+        self._states = deque(maxlen=self._buffer_size)
+        self._actions = deque(maxlen=self._buffer_size)
+        self._rewards = deque(maxlen=self._buffer_size)
+        self._next_states = deque(maxlen=self._buffer_size)
 
-    def save_previous_data(self, previous_reward):
-        if self._previous_data_string == "": return
+    def add(self, state, action, reward, next_state):
+        self._sample = {'state': state, 'action': action, 'reward': reward, 'next_state': next_state}
+        self._add_to_local_buffer() if self._local else self._add_to_remote_buffer()
 
-        data_string = self._previous_data_string + "," + str(previous_reward) + '\n'
+    def get_batch(self, batch_size):
+        if not self._local:
+            self._fetch_from_remote_buffer()
+        size = min(batch_size, len(self._states))
+        batch = np.random.choice(size, size)
+        return np.array(self._states)[batch], np.array(self._actions)[batch], \
+            np.array(self._rewards)[batch], np.array(self._next_states)[batch]
 
-        file_name = f"data/data{self._training_sample_batch_id}.csv"
-        with open(file_name, "a") as ds_file:
-            ds_file.write(data_string)
-        
-        self._data_num = self._data_num + 1
-        if self._data_num == self._training_sample_batch_size:
-            self._data_num = 0
-            self._training_sample_batch_id = str(uuid4())
-            thread = Thread(target=retrain_network, args=(file_name, ), daemon=True)
-            thread.start()
+    def _fetch_from_remote_buffer(self):
+        self._states = [json.loads(s) for s in self._pubsub.publisher.lrange('states', 0, -1)]
+        self._actions = [json.loads(s) for s in self._pubsub.publisher.lrange('actions', 0, -1)]
+        self._rewards = [json.loads(s) for s in self._pubsub.publisher.lrange('rewards', 0, -1)]
+        self._next_states = [json.loads(s) for s in self._pubsub.publisher.lrange('next_states', 0, -1)]
+
+    def _add_to_local_buffer(self):
+        self._states.append(self._sample['state'])
+        self._actions.append(self._sample['action'])
+        self._rewards.append(self._sample['reward'])
+        self._next_states.append(self._sample['next_state'])
+
+    def _add_to_remote_buffer(self):
+        self._send_list_to_remote_buffer('states', self._sample['state'])
+        self._send_list_to_remote_buffer('actions', self._sample['action'])
+        self._send_list_to_remote_buffer('rewards', self._sample['reward'])
+        self._send_list_to_remote_buffer('next_states', self._sample['next_state'])
+
+    def _send_list_to_remote_buffer(self, key, list_):
+        self._pubsub.publisher.rpush(key, json.dumps(list_))

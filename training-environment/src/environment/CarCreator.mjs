@@ -12,8 +12,10 @@ export class CarCreator {
     createCars = (lanes, cars) => {
         this.countdownCarCreation();
 
-        const timeToCreateCar = this.carCreationInterval === 0;
-        if(timeToCreateCar) {
+        const timeToCreateCar = this.carCreationInterval <= 0;
+        const carIndex = cars.findIndex(car => car.position.y < 0);
+        const canCreateCar = carIndex === -1;
+        if(timeToCreateCar && canCreateCar) {
             const arr = [];
             while(arr.length < CARS_TO_CREATE){
                 const randomNum = Math.random();

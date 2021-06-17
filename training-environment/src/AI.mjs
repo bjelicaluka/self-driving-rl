@@ -14,22 +14,40 @@ export class AI {
     this.previousReward = 0;
     this.pubsub = new RedisPubSub();
 
+    this.prevData = null;
+
     this.init();
   }
 
-  think() {
-    if (!this.traffic.agent.transitioning && !(--this.apiCallInterval >= 0)) {
+  think(crashed) {
+    if((!this.traffic.agent.transitioning && !(--this.apiCallInterval >= 0)) || crashed){
 
-      const state = this.traffic.agent.getSnapshot();
-      const speedPercentage = this.traffic.speed / MAX_SPEED;
+      const nextState = this.traffic.agent.getSnapshot();
 
       this.pubsub.publish(`state_${this.episodeId}`, {
-        state: [
-          speedPercentage,
-          ...state
-        ]
+        state: nextState,
+        episode_id: this.episodeId
       });
       this.apiCallInterval = AGENT_CALL_FREQUENCY;
+
+      if(this.prevData) {
+        const { direction, acceleration, state } = this.prevData;
+
+        this.pubsub.publish(`feedback_${this.episodeId}`, {
+          state,
+          action: [
+            direction + 1,
+            acceleration * 10 + 0.5
+          ],
+          reward: [
+            Feedback.generateDirectionFeedback(state, direction, nextState, crashed),
+            Feedback.generateAccelerationFeedback(state, acceleration, nextState, crashed),
+          ],
+          next_state: nextState,
+          crashed
+        });
+      }
+
       return true;
     }
     return false;
@@ -37,29 +55,13 @@ export class AI {
 
   init() {
     this.pubsub.subscribe(`action_${this.episodeId}`, data => {
-      const { direction, acceleration, state } = data;
+      const { direction, acceleration } = data;
 
       this.traffic.agent.changeLane(this.traffic.lanes, direction);
       this.traffic.agent.acl = parseFloat(acceleration) + 1;
 
-      const speedPercentage = this.traffic.speed / MAX_SPEED;
-      const nextState = [speedPercentage, ...this.traffic.agent.getSnapshot()];
-
-      this.pubsub.publish(`feedback_${this.episodeId}`, {
-        state,
-        action: [
-          direction + 1,
-          acceleration * 1 + 0.5
-        ],
-        reward: [
-          Feedback.generateDirectionFeedback(state, direction, nextState),
-          Feedback.generateAccelerationFeedback(state, acceleration, nextState),
-        ],
-        next_state: nextState,
-        crashed: this.traffic.crashed
-      });
+      this.prevData = data;
     });
-    // this.traffic.onCrashed(send);
   }
 
   close() {
