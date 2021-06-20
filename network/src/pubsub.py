@@ -11,8 +11,8 @@ class RedisPubSub(object):
     def publish(self, channel, message):
         self.publisher.publish(channel, message)
 
-    def subscribe(self, channel, handler):
+    def subscribe(self, channel, handler, *args):
         self.subscriber.subscribe([channel])
         for message in self.subscriber.listen():
             if message['type'] == 'message':
-                handler(json.loads(message['data']))
+                handler(json.loads(message['data']), *args)

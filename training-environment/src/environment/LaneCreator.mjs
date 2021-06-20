@@ -10,7 +10,7 @@ export class LaneCreator {
         const newLanes = [];
         for(let i = 0; i < NUM_OF_LANES; i++) {
             const lanePosition = LANE_WIDTH * (i + (i + 1)) / 2;
-            const newLane = new Lane(new Position(lanePosition, 0), i, i * 0.05 * getRandomArbitraryNumber(1, 1.5));
+            const newLane = new Lane(new Position(lanePosition, 0), i, i * 0.05 * 0.9);
             newLanes.push(newLane);
         }
         return newLanes;

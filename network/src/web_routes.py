@@ -1,4 +1,4 @@
-from src.data_buffer import DataHandler
+from src.replay_buffer import DataHandler
 from flask import Flask, request, jsonify, make_response
 import numpy as np
 from flask_cors import CORS

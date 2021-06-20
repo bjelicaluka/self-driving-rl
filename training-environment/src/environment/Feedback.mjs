@@ -8,10 +8,6 @@ class State {
     this.rightSideSensorSafetyZoneActive = !!stateList[5];
     this.rightSideSensorDistance = stateList[6];
   }
-
-  getTotalDistance() {
-    return this.frontSensorDistance + this.leftSideSensorDistance + this.rightSideSensorDistance;
-  }
 }
 
 export class Feedback {
@@ -22,11 +18,13 @@ export class Feedback {
 
     let sum = 0;
 
-    // -5 0
-    sum += crashed ? -5 : 0;
+    sum += nextState.speed;
 
-    const minValue = -5;
-    const maxValue = 0;
+    // -10 0
+    // sum += crashed ? -10 : 0;
+
+    const minValue = 0;
+    const maxValue = 1;
 
     return Feedback.scaleFeedback(sum, minValue, maxValue);
   }
@@ -37,14 +35,10 @@ export class Feedback {
 
     let sum = 0;
 
-    // 0 1
-    // const isMaxSpeed = state.speed === nextState.speed && state.speed === 1;
-    // sum += !isMaxSpeed && nextState.speed - state.speed;
+    // -10 1
+    sum += crashed ? -10 : nextState.speed === 0 ? -5 : nextState.speed;
 
-    // -5 1
-    sum += crashed ? -8 : nextState.speed === 0 ? -4 : nextState.speed;
-
-    const minValue = -8;
+    const minValue = -10;
     const maxValue = 1;
 
     return Feedback.scaleFeedback(sum, minValue, maxValue);

@@ -1,7 +1,11 @@
 const NUM_OF_LANES = 10;
 const MAX_SPEED = 2;
 const CARS_TO_CREATE = 3;
-const CAR_CREATION_INTERVAL = 50;
+const CAR_CREATION_INTERVAL = 100;
+const RANDOM_CAR_SPAWNING = true;
+const CAR_SPAWN_SEQUENCE = 
+  [1, 2, 6, 
+  3, 8, 5];
 
 let windowWidth = 947;
 if (windowWidth <= 400) {
@@ -15,8 +19,10 @@ if (windowWidth <= 400) {
 export const CONFIG = {
   API_URL: "http://localhost:4000/predict",
   HEARTBEAT_URL: "http://localhost:4000/heartbeat",
-  AGENT_CALL_FREQUENCY: 20,
+  AGENT_CALL_FREQUENCY: 30,
   NO_PASSED_CARS_TIME_LIMIT: 1000,
+  RANDOM_CAR_SPAWNING,
+  CAR_SPAWN_SEQUENCE,
   // Static fields.
   CAR_WIDTH: windowWidth * 0.0375,
   CAR_HEIGHT: windowWidth * 0.0625,

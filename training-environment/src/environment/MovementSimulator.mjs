@@ -43,7 +43,7 @@ export class MovementSimulator {
     //     }
     // }
     static adjustSpeed = (agent, speed, setSpeed) => {
-        const acl = agent.acl;
+        const acl = this.getAcl(agent);
         agent.speed = speed;
         
         const speedAdjuster = speed => speed < 0.1 ? speed + acl - 1 : speed * acl;
@@ -53,6 +53,13 @@ export class MovementSimulator {
         if(carCrashed) {
             setSpeed(0);
         }
+    }
+
+    static getAcl = (agent) => {
+        if(agent.safetySystemActive) {
+            return agent.frontSensor.safetyZoneActive ? 0.85 : 1.05;
+        }
+        return agent.acl;
     }
 
     static removeCarsOutOfSight = (cars) => {

@@ -23,6 +23,8 @@ export class Agent extends Car {
 
     this.isAgent = true;
     this.carInFront = null;
+
+    this.safetySystemActive = true;
   }
 
   getSnapshot = () => {
@@ -47,11 +49,11 @@ export class Agent extends Car {
   }
 
   scanForCars = (cars) => {
-    // if(this.carInFront) {
-    //   this.carInFront.speed = this.carInFront.previousSpeed;
-    //   this.carInFront.speedAdjuster = speed => speed;
-    //   this.carInFront = null;
-    // }
+    if(this.safetySystemActive && this.carInFront) {
+      this.carInFront.speed = this.carInFront.previousSpeed;
+      this.carInFront.speedAdjuster = speed => speed;
+      this.carInFront = null;
+    }
     this.frontSensor.setInitialValues();
     this.collisionSensor.setInitialValues();
     this.rightSideSensor.setInitialValues();
@@ -59,14 +61,15 @@ export class Agent extends Car {
 
     for (const i in cars) {
       const car = cars[i];
-      // const wasActive = this.frontSensor.safetyZoneActive;
+      const wasActive = this.frontSensor.safetyZoneActive;
       this.frontSensor.checkCar(car);
       this.collisionSensor.checkCar(car);
-      // if (!wasActive && this.frontSensor.safetyZoneActive) {
-      //   this.carInFront = car;
-      //   car.previousSpeed = car.speed;
-      //   car.speedAdjuster = speed => this.speed
-      // } else {
+      if (!wasActive && this.frontSensor.safetyZoneActive && this.safetySystemActive) {
+        this.carInFront = car;
+        car.previousSpeed = car.speed;
+        car.speedAdjuster = speed => this.speed
+      } 
+      // else {
       //   car.speedAdjuster = speed => speed;
       // }
 
@@ -80,10 +83,12 @@ export class Agent extends Car {
 
   changeLane = (lanes, direction) => {
     const newLaneIndex = this.lane.laneNum + direction;
-    if (direction === -1 && this.leftSideSensor.safetyZoneActive) {
-      this.collisionSensor.safetyZoneActive = true;
-    } else if (direction === 1 && this.rightSideSensor.safetyZoneActive) {
-      this.collisionSensor.safetyZoneActive = true;
+    if(!this.safetySystemActive) {
+      if (direction === -1 && this.leftSideSensor.safetyZoneActive) {
+        this.collisionSensor.safetyZoneActive = true;
+      } else if (direction === 1 && this.rightSideSensor.safetyZoneActive) {
+        this.collisionSensor.safetyZoneActive = true;
+      }
     }
     if (this.canChangeLane(lanes, direction, newLaneIndex)) {
       this.lane = lanes[newLaneIndex]
@@ -94,13 +99,13 @@ export class Agent extends Car {
 
   canChangeLane = (lanes, direction, newLaneIndex) => {
     const validLane = lanes[newLaneIndex];
-    // const canMoveLeft = direction === -1 && this.leftSideSensor.safetyZoneActive === false;
-    // const canMoveRight = direction === 1 && this.rightSideSensor.safetyZoneActive === false;
-    return validLane && !this.transitioning;
+    const canMoveLeft = direction === -1 && this.leftSideSensor.safetyZoneActive === false;
+    const canMoveRight = direction === 1 && this.rightSideSensor.safetyZoneActive === false;
+    return validLane && !this.transitioning && (!this.safetySystemActive || (canMoveLeft || canMoveRight));
   }
 
   animateLaneChange = async (oldPosition, newPosition) => {
-    const frames = 10;
+    const frames = 5;
     this.transitioning = true;
     for (let i = 0; i <= frames; i++) {
       const delta = i / frames;

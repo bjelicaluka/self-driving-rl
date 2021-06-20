@@ -2,7 +2,7 @@ import { CONFIG } from './config.mjs'
 import { Feedback } from './environment/Feedback.mjs';
 import { RedisPubSub } from './pubsub/RedisPubSub.mjs';
 
-const { AGENT_CALL_FREQUENCY, MAX_SPEED } = CONFIG;
+const { AGENT_CALL_FREQUENCY } = CONFIG;
 
 export class AI {
 
@@ -19,8 +19,8 @@ export class AI {
     this.init();
   }
 
-  think(crashed) {
-    if((!this.traffic.agent.transitioning && !(--this.apiCallInterval >= 0)) || crashed){
+  think(terminal) {
+    if((!this.traffic.agent.transitioning && !(--this.apiCallInterval >= 0)) || terminal){
 
       const nextState = this.traffic.agent.getSnapshot();
 
@@ -40,11 +40,11 @@ export class AI {
             acceleration * 10 + 0.5
           ],
           reward: [
-            Feedback.generateDirectionFeedback(state, direction, nextState, crashed),
-            Feedback.generateAccelerationFeedback(state, acceleration, nextState, crashed),
+            Feedback.generateDirectionFeedback(state, direction, nextState, terminal),
+            Feedback.generateAccelerationFeedback(state, acceleration, nextState, terminal),
           ],
           next_state: nextState,
-          crashed
+          terminal
         });
       }
 
