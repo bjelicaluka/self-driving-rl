@@ -2,7 +2,7 @@ import { CONFIG } from "../config.mjs";
 import { Agent } from "./Agent.mjs";
 import { PassingCar } from "./PassingCar.mjs";
 
-const {CAR_CREATION_INTERVAL, CARS_TO_CREATE, NUM_OF_LANES, CAR_SPAWN_SEQUENCE, RANDOM_CAR_SPAWNING} = CONFIG;
+const {CAR_CREATION_INTERVAL, CARS_TO_CREATE, NUM_OF_LANES, CAR_SPAWN_SEQUENCE, RANDOM_CAR_SPAWNING, NUM_OF_SEQUENCES_FOR_WIN} = CONFIG;
 
 export class CarCreator {
     constructor() {
@@ -10,7 +10,8 @@ export class CarCreator {
         this.isRandom = !!RANDOM_CAR_SPAWNING;
         this.sequence = [...CAR_SPAWN_SEQUENCE];
 
-        this.currentSequence = [...CAR_SPAWN_SEQUENCE]
+        this.currentSequence = [...CAR_SPAWN_SEQUENCE];
+        this.numOfSequences = NUM_OF_SEQUENCES_FOR_WIN;
     }
     
     createCars = (lanes, cars) => {
@@ -19,7 +20,7 @@ export class CarCreator {
         const timeToCreateCar = this.carCreationInterval <= 0;
         const carIndex = cars.findIndex(car => car.position.y < 0);
         const canCreateCar = carIndex === -1;
-        if(timeToCreateCar && canCreateCar) {
+        if(timeToCreateCar && canCreateCar && this.numOfSequences) {
             const arr = [];
             while(arr.length < CARS_TO_CREATE) {
                 const laneNum = this.getLaneNum();
@@ -51,6 +52,7 @@ export class CarCreator {
     }
 
     setInitialSequence = () => {
+        this.numOfSequences--;
         this.currentSequence = [...this.sequence];
     }
 

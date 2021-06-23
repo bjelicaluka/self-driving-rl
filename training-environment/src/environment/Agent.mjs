@@ -68,10 +68,9 @@ export class Agent extends Car {
         this.carInFront = car;
         car.previousSpeed = car.speed;
         car.speedAdjuster = speed => this.speed
-      } 
-      // else {
-      //   car.speedAdjuster = speed => speed;
-      // }
+      } else {
+        car.speedAdjuster = speed => speed;
+      }
 
       this.rightSideSensor.checkCar(car);
       this.rightSideSensor.scanForLaneEdges(this.lane.laneNum);

@@ -12,19 +12,22 @@ class State {
 
 export class Feedback {
 
-  static generateDirectionFeedback = (stateList, direction, nextStateList, crashed) => {
+  static generateDirectionFeedback = (stateList, direction, nextStateList, traffic) => {
     const state = new State(stateList);
     const nextState = new State(nextStateList);
 
     let sum = 0;
 
-    sum += nextState.speed;
+    // -3 3
+    sum += (nextState.speed - state.speed) * 3;
 
     // -10 0
-    // sum += crashed ? -10 : 0;
+    sum += traffic.stopped ? -10 : 0;
+    // 0 10
+    sum += traffic.won ? 10 : 0;
 
-    const minValue = 0;
-    const maxValue = 1;
+    const minValue = -3 -10 + 0;
+    const maxValue =  3 + 0 + 10;
 
     return Feedback.scaleFeedback(sum, minValue, maxValue);
   }

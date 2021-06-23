@@ -5,10 +5,10 @@ from src.pubsub import RedisPubSub
 
 
 class ReplayBuffer(object):
-    def __init__(self, local=True):
+    def __init__(self, local=True, buffer_size=100000):
         super().__init__()
         self._sample = None
-        self._buffer_size = 10000
+        self._buffer_size = buffer_size
         self._local = local
         self._pubsub = RedisPubSub() if not self._local else None
 

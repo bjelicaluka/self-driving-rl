@@ -14,15 +14,21 @@ export class TrafficEventHandler extends SocketIOClient {
     this.addEventListener('connect_error', (e) => {
       console.log(e);
     });
-    
   }
 
   onTraffic(trafficHandler) {
     this.addEventListener('traffic', trafficHandler);
   }
 
+  onEpisodeEnd(episodeEndHandler) {
+    this.addEventListener('episode_end', episodeEndHandler);
+  }
+
+  onPing(pingHandler) {
+    this.addEventListener('ping', pingHandler);
+  }
+
   onConfig(configHandler) {
     this.addEventListener('config', configHandler);
   }
-
 }

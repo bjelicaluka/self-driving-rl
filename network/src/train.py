@@ -1,17 +1,24 @@
+from threading import Thread
 import numpy as np
 
+from src.pubsub import RedisPubSub
 from src.replay_buffer import ReplayBuffer
-from src.model import ModelInstanceProvider
+from src.model import ModelInstanceProvider, Model
 
-dir_actions = [0, 0.5, 1]
-acc_actions = [0, 0.5, 1]
+num_of_simulations = 1
 
 
-def train():
-    q_model = ModelInstanceProvider.get_instance()
+def handle_feedback(data):
+    state = data['state']
+    action = data['action']
+    reward = data['reward']
+    next_state = data['next_state']
+    terminal = 0 if data['done'] else 1
+
+    buffer.add(state[1:7], action, reward, next_state[1:7], terminal)
 
     gamma = 0.99
-    batch_size = len(buffer)
+    batch_size = 32
 
     states, actions, rewards, next_states, terminals = buffer.get_batch(batch_size)
 
@@ -20,30 +27,29 @@ def train():
     q_state = q_model.predict(states)
     q_next_state = target_model.predict(next_states)
 
-    direction_indices, acceleration_indices = actions[:, 0], actions[:, 1]
-    next_direction_indices, next_acceleration_indices = \
-        np.argmax(q_next_state[0], axis=1), np.argmax(q_next_state[1], axis=1)
+    direction_indices = np.array(actions[:, 0]).astype(int)
+    next_direction_indices = np.argmax(q_next_state, axis=1)
 
-    q_state[0][:, direction_indices] = \
-        rewards[:, 0] + gamma * q_next_state[0][:, next_direction_indices] * terminals
-    q_state[1][:, acceleration_indices] = \
-        rewards[:, 1] + gamma * q_next_state[1][:, next_acceleration_indices] * terminals
+    q_state[:, direction_indices] = rewards[:, 0] + gamma * q_next_state[:, next_direction_indices] * terminals
 
-    q_model.fit(states, q_state, epochs=10, batch_size=32, verbose=1)
+    q_model.fit(states, q_state, epochs=1, batch_size=1, verbose=1)
+
+    if data['done']:
+        target_model.set_weights(q_model.get_weights())
+        ModelInstanceProvider.update_instance()
 
 
 if __name__ == '__main__':
-    ModelInstanceProvider.init(new_model=False)
+    ModelInstanceProvider.init(new_model=True)
+    q_model = ModelInstanceProvider.get_instance()
 
-    buffer = ReplayBuffer(local=False)
+    buffer = ReplayBuffer(local=True, buffer_size=2000)
 
-    for e in range(1000):
-        buffer.load()
-        print(f"Buffer length: {len(buffer)}")
+    target_model = Model()
+    target_model.compile()
+    target_model.set_weights(q_model.get_weights())
 
-        target_model = ModelInstanceProvider.get_instance()
-
-        for _ in range(10):
-            print(f"Epoch: {e} - Trained: {_}")
-            train()
-        ModelInstanceProvider.save_instance()
+    for i in range(num_of_simulations):
+        pubsub = RedisPubSub()
+        thread = Thread(target=pubsub.subscribe, args=(f'feedback_{i}', handle_feedback,), daemon=False)
+        thread.start()

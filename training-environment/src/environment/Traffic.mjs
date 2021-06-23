@@ -3,7 +3,7 @@ import { CarCreator } from "./CarCreator.mjs";
 import { LaneCreator } from "./LaneCreator.mjs";
 import {CONFIG} from "../config.mjs";
 
-const {MAX_SPEED, NO_PASSED_CARS_TIME_LIMIT} = CONFIG;
+const {MAX_SPEED, NO_PASSED_CARS_TIME_LIMIT, CAR_SPAWN_SEQUENCE, NUM_OF_SEQUENCES_FOR_WIN} = CONFIG;
 
 export class Traffic {
     constructor(changeSpeed, updatePassedCars) {
@@ -19,6 +19,9 @@ export class Traffic {
         this.crashed = false;
         this.passedCars = 0;
         this.noPassedCarsTimeLimit = NO_PASSED_CARS_TIME_LIMIT;
+        this.stoppedFrames = 0;
+
+        this.checkIfDone();
     }
 
     changeSpeed = (speed) => {
@@ -41,6 +44,7 @@ export class Traffic {
             this.moveCars();
             this.removePassedCars();
         }
+        this.checkIfDone();
     }
 
     createCars = () => {
@@ -59,5 +63,17 @@ export class Traffic {
         this.updatePassedCarsState(removedCars);
         this.passedCars += removedCars;
         this.noPassedCarsTimeLimit = NO_PASSED_CARS_TIME_LIMIT;
+    }
+
+    checkIfDone = () => {
+        const notMoving = this.agent.speed === 0;
+        if(notMoving) {
+            this.stoppedFrames += 1;
+        } else {
+            this.stoppedFrames = 0;
+        }
+        this.stopped = this.stoppedFrames >= 400 || this.crashed;
+        this.won = this.passedCars === CAR_SPAWN_SEQUENCE.length * NUM_OF_SEQUENCES_FOR_WIN;
+        this.done = this.won || this.stopped;
     }
 }

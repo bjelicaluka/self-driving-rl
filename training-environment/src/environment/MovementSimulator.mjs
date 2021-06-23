@@ -20,28 +20,6 @@ export class MovementSimulator {
         }
     }
 
-    // static adjustSpeed = (agent, speed, setSpeed) => {
-    //     const brakingSpeed = 100;
-    //     agent.speed = speed;
-    //     if(agent.frontSensor.safetyZoneActive) {
-    //         if(speed > 0.1) {
-    //             setSpeed(speed * (1 - 0.001 * brakingSpeed * MAX_SPEED));
-    //         } else {
-    //             setSpeed(0);
-    //         }
-    //     } else {
-    //         if(speed < 0.1) {
-    //             setSpeed(speed + 0.05);
-    //         } else {
-    //             setSpeed(speed + 0.05/speed);
-    //         }
-    //     }
-
-    //     const carCrashed = agent.collisionSensor.safetyZoneActive;
-    //     if(carCrashed) {
-    //         setSpeed(0);
-    //     }
-    // }
     static adjustSpeed = (agent, speed, setSpeed) => {
         const acl = this.getAcl(agent);
         agent.speed = speed;
@@ -57,7 +35,7 @@ export class MovementSimulator {
 
     static getAcl = (agent) => {
         if(agent.safetySystemActive) {
-            return agent.frontSensor.safetyZoneActive ? 0.85 : 1.05;
+            return agent.frontSensor.safetyZoneActive ? 0.85 : 1.01;
         }
         return agent.acl;
     }

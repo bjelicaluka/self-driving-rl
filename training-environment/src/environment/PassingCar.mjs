@@ -23,6 +23,7 @@ export class PassingCar extends Car {
         this.carInFront.speed = this.speed;
         this.carInFront.speedAdjuster = this.speedAdjuster;
       } else {
+        this.carInFront.speed = null;
         this.carInFront.speedAdjuster = speed => speed;
         this.carInFront = null;
         this.scanAllCars(cars);

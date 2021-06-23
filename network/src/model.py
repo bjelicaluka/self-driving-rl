@@ -11,28 +11,20 @@ from src.pubsub import RedisPubSub
 
 class Model(object):
 
-    def __init__(self, network_id='0') -> None:
+    def __init__(self) -> None:
         super().__init__()
-        self.network_id = network_id
-        self.learning_rate = 0.001
+        state_input = Input(shape=(6,))
 
-        state_input = Input(shape=(7,))
+        hidden_for_dir = Dense(32, activation='relu')(state_input)
+        # hidden_for_dir = Dense(32, activation='relu')(hidden_for_dir)
+        direction_output = Dense(3, activation='linear')(hidden_for_dir)
 
-        hidden_for_dir = Dense(50, activation='relu')(state_input)
-        hidden_for_acc = Dense(50, activation='relu')(state_input)
-
-        hidden_for_dir_ = Dense(50, activation='relu')(hidden_for_dir)
-        hidden_for_acc_ = Dense(50, activation='relu')(hidden_for_acc)
-
-        direction_output = Dense(3, activation='linear')(hidden_for_dir_)
-        acceleration_output = Dense(2, activation='linear')(hidden_for_acc_)
-
-        self._model = KerasModel(inputs=state_input, outputs=[direction_output, acceleration_output])
+        self._model = KerasModel(inputs=state_input, outputs=direction_output)
 
     def compile(self):
         self._model.compile(loss=MeanSquaredError(),
-                            optimizer=Adam(learning_rate=self.learning_rate),
-                            metrics=['mse'])
+                            optimizer=Adam(learning_rate=0.001, clipnorm=1.),
+                            metrics=['accuracy'])
 
     def fit(self, x, y, epochs=1, batch_size=1, verbose=1):
         self._model.fit(x, y, epochs=epochs, batch_size=batch_size, verbose=verbose)
@@ -59,18 +51,21 @@ class Model(object):
 class ModelInstanceProvider(object):
 
     @staticmethod
-    def init(new_model=False):
+    def init(new_model=False, file_path=None):
         global model, pubsub
         model = Model()
         model.compile()
         pubsub = RedisPubSub()
         if new_model:
             pubsub.publisher.delete('weights')
-        weights = pubsub.publisher.get('weights')
-        if weights is not None:
-            weights = json.loads(weights)
-            weights = [np.array(w) for w in weights]
-            model.set_weights(weights)
+        elif file_path is not None:
+            model.load(file_path)
+        else:
+            weights = pubsub.publisher.get('weights')
+            if weights is not None:
+                weights = json.loads(weights)
+                weights = [np.array(w) for w in weights]
+                model.set_weights(weights)
 
     @staticmethod
     def get_instance():
@@ -78,8 +73,8 @@ class ModelInstanceProvider(object):
         return model
 
     @staticmethod
-    def save_instance():
+    def update_instance():
         global model, pubsub
         weights = json.dumps([w.tolist() for w in model.get_weights()])
         pubsub.publisher.set('weights', weights)
-        pubsub.publish('target_model_update', json.dumps({'weights': weights}))
+        pubsub.publish('model_update', json.dumps({'weights': weights}))

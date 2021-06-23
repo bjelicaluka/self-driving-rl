@@ -6,6 +6,11 @@ export class ResultDisplay extends React.Component {
         super(props);
         this.speedSum = 0;
         this.count = 0;
+
+        this.props.trafficEventHandler.onEpisodeEnd(() => {
+            this.speedSum = 0;
+            this.count = 0;
+        });
     }
 
     componentDidUpdate() {
@@ -41,6 +46,7 @@ export class ResultDisplay extends React.Component {
                 <AgentInputForm
                     showSensors={this.props.showSensors}
                     toggleShowSensors={this.props.toggleShowSensors}
+                    trafficEventHandler={this.props.trafficEventHandler}
                 />
             </div>
         );

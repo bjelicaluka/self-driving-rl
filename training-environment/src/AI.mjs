@@ -19,8 +19,8 @@ export class AI {
     this.init();
   }
 
-  think(terminal) {
-    if((!this.traffic.agent.transitioning && !(--this.apiCallInterval >= 0)) || terminal){
+  think() {
+    if((!this.traffic.agent.transitioning && !(--this.apiCallInterval >= 0)) || this.traffic.done){
 
       const nextState = this.traffic.agent.getSnapshot();
 
@@ -40,11 +40,12 @@ export class AI {
             acceleration * 10 + 0.5
           ],
           reward: [
-            Feedback.generateDirectionFeedback(state, direction, nextState, terminal),
-            Feedback.generateAccelerationFeedback(state, acceleration, nextState, terminal),
+            Feedback.generateDirectionFeedback(state, direction, nextState, this.traffic),
+            Feedback.generateAccelerationFeedback(state, acceleration, nextState, this.traffic),
           ],
           next_state: nextState,
-          terminal
+          done: !!this.traffic.done,
+          passed_cars: this.traffic.passedCars
         });
       }
 

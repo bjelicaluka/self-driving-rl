@@ -1,5 +1,4 @@
 import React from "react"
-import { ConnectionStatus } from "../../ConnectionStatus";
 
 export class AgentInputForm extends React.Component {
     constructor(props) {
@@ -7,19 +6,9 @@ export class AgentInputForm extends React.Component {
         this.state = {
             connected: false
         }
-        this.checkConnectionStatus();
-        setInterval(() => {
-            this.checkConnectionStatus();
-        }, 10000);
-    }
-
-    checkConnectionStatus = () => {
-        ConnectionStatus.check()
-        .then(resp => {
-            this.setState({connected: resp.status === 200});
-        })
-        .catch(err => {
-            this.setState({connected: false});
+        
+        this.props.trafficEventHandler.onPing(() => {
+            this.setState({connected: true});
         });
     }
 
@@ -40,7 +29,7 @@ export class AgentInputForm extends React.Component {
         return (
             <fieldset>
                 <legend>
-                    <span className="number">4</span> Agent
+                    <span className="number"></span> Agent
                     {this.renderConnectionStatus()}
                 </legend>
                 <input
