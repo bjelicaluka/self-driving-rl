@@ -16,10 +16,11 @@ class Model(object):
         state_input = Input(shape=(6,))
 
         hidden_for_dir = Dense(32, activation='relu')(state_input)
-        # hidden_for_dir = Dense(32, activation='relu')(hidden_for_dir)
-        direction_output = Dense(3, activation='linear')(hidden_for_dir)
+        hidden_for_acc = Dense(32, activation='relu')(state_input)
+        dir_output = Dense(3, activation='linear')(hidden_for_dir)
+        acc_output = Dense(3, activation='linear')(hidden_for_acc)
 
-        self._model = KerasModel(inputs=state_input, outputs=direction_output)
+        self._model = KerasModel(inputs=state_input, outputs=[dir_output, acc_output])
 
     def compile(self):
         self._model.compile(loss=MeanSquaredError(),
@@ -66,6 +67,7 @@ class ModelInstanceProvider(object):
                 weights = json.loads(weights)
                 weights = [np.array(w) for w in weights]
                 model.set_weights(weights)
+        ModelInstanceProvider.update_instance()
 
     @staticmethod
     def get_instance():

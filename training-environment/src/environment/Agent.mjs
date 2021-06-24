@@ -7,7 +7,7 @@ import { LeftSideSensor } from "./sensors/LeftSideSensor.mjs";
 import { RightSideSensor } from "./sensors/RightSideSensor.mjs";
 import { CONFIG } from "../config.mjs";
 
-const { CANVAS_HEIGHT, MAX_SPEED } = CONFIG;
+const { CANVAS_HEIGHT, MAX_SPEED, SAFETY_ZONE_ACTIVE } = CONFIG;
 
 export class Agent extends Car {
   constructor(lane) {
@@ -24,7 +24,7 @@ export class Agent extends Car {
     this.isAgent = true;
     this.carInFront = null;
 
-    this.safetySystemActive = true;
+    this.safetySystemActive = SAFETY_ZONE_ACTIVE;
   }
 
   getSnapshot = () => {

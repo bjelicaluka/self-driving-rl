@@ -1,16 +1,15 @@
 from threading import Thread
-from src.model import ModelInstanceProvider, Model
+from src.model import ModelInstanceProvider
 from src.pubsub import RedisPubSub
 import numpy as np
 import json
-
 
 global frame
 frame = 0
 num_of_simulations = 1
 num_dir_actions = 3
-num_acc_actions = 2
-random_frames = 500
+num_acc_actions = 3
+random_frames = 1
 
 
 def epsilon(f):
@@ -26,17 +25,19 @@ def generate_action(data, index):
 
     prediction = model.predict(np.array([state[1:7]]))
 
-    print(f"Q values: {prediction[0]}")
+    print(f"Q values: {prediction}")
 
     if np.random.rand() > epsilon(frame):
-        direction_index = np.array([np.random.randint(0, num_dir_actions)])
+        dir_index = np.array([np.random.randint(0, num_dir_actions)])
+        acc_index = np.array([np.random.randint(0, num_acc_actions)])
     else:
-        direction_index = np.argmax(prediction, axis=1)
+        dir_index, acc_index = np.argmax(prediction[0], axis=1), np.argmax(prediction[1], axis=1)
 
-    print("Action: {} Epsilon: {}".format(np.argmax(prediction, axis=1)[0] - 1, epsilon(frame)))
-
-    direction = int(direction_index) - 1
-    pubsub_state.publish(f'action_{index}', json.dumps({'direction': direction, 'acceleration': 1, 'state': state}))
+    direction = int(dir_index) - 1
+    acceleration = int(acc_index - 1) * 0.05
+    print("Action: {} {} Epsilon: {}".format(direction, acceleration, epsilon(frame)))
+    pubsub_state.publish(f'action_{index}',
+                         json.dumps({'direction': direction, 'acceleration': acceleration, 'state': state}))
 
 
 def handle_target_model_update(data):
@@ -50,7 +51,7 @@ def handle_target_model_update(data):
 
 
 if __name__ == '__main__':
-    ModelInstanceProvider.init(new_model=False)
+    ModelInstanceProvider.init(new_model=False, file_path='saved-model')
 
     for i in range(num_of_simulations):
         pubsub_state = RedisPubSub()

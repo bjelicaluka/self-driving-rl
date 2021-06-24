@@ -1,5 +1,6 @@
 from threading import Thread
 import numpy as np
+import json
 import matplotlib.pyplot as plt
 
 from src.pubsub import RedisPubSub
@@ -35,19 +36,21 @@ def handle_feedback(data):
     q_state = q_model.predict(states)
     q_next_state = target_model.predict(next_states)
 
-    direction_indices = np.array(actions[:, 0]).astype(int)
-    next_direction_indices = np.argmax(q_next_state, axis=1)
+    dir_indices, acc_indices = actions[:, 0], actions[:, 1]
+    next_dir_indices, next_acc_indices = np.argmax(q_next_state[0], axis=1), np.argmax(q_next_state[1], axis=1)
 
-    q_state[:, direction_indices] = rewards[:, 0] + gamma * q_next_state[:, next_direction_indices] * terminals
+    q_state[0][:, dir_indices] = rewards[:, 0] + gamma * q_next_state[0][:, next_dir_indices] * terminals
+    q_state[1][:, acc_indices] = rewards[:, 1] + gamma * q_next_state[1][:, next_acc_indices] * terminals
 
     q_model.fit(states, q_state, epochs=1, batch_size=1, verbose=1)
 
-    total_reward = total_reward + reward[0]
+    total_reward = total_reward + np.mean(reward)
     total_frames = total_frames + 1
 
     if data['done']:
         ep = ep + 1
-        final_rewards.append(reward[0])
+        final_reward = np.mean(reward)
+        final_rewards.append(final_reward)
         avg_rewards.append(total_reward / total_frames)
         total_frames = 0
         total_reward = 0
@@ -56,8 +59,19 @@ def handle_feedback(data):
         plt.plot(range(ep), avg_rewards)
         plt.show()
 
+        update_best(final_reward, target_model.get_weights())
         ModelInstanceProvider.update_instance()
         target_model.set_weights(q_model.get_weights())
+
+
+def update_best(score, weights):
+    best_score = pubsub.publisher.get('best_score')
+    print("Score: {}, Best score: {}".format(score, float(best_score)))
+    if best_score is None or score > float(best_score):
+        print("New best is set!")
+        pubsub.publisher.set('best_score', str(score))
+        best_weights = json.dumps([w.tolist() for w in weights])
+        pubsub.publisher.set('best_weights', best_weights)
 
 
 if __name__ == '__main__':

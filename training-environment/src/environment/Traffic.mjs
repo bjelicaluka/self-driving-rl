@@ -79,7 +79,7 @@ export class Traffic {
         }
         this.stopped = this.stoppedFrames >= 400 || this.crashed;
         this.won = this.passedCars === CAR_SPAWN_SEQUENCE.length * NUM_OF_SEQUENCES_FOR_WIN;
-        this.done = this.won || this.stopped;
+        this.done = this.won || this.stopped || this.crashed;
     }
 
     updateAvgSpeed = () => {

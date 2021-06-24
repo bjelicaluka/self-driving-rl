@@ -3,6 +3,7 @@ const MAX_SPEED = 2;
 const CARS_TO_CREATE = 2;
 const CAR_CREATION_INTERVAL = 100;
 const RANDOM_CAR_SPAWNING = false;
+const SAFETY_ZONE_ACTIVE = false;
 
 const NUM_OF_SEQUENCES_FOR_WIN = 3;
 const CAR_SPAWN_SEQUENCE = 
@@ -10,7 +11,7 @@ const CAR_SPAWN_SEQUENCE =
   2, 0, 4, 6,
   5, 8, 0, 1];
 
-let windowWidth = 947;
+let windowWidth = 1024;
 if (windowWidth <= 400) {
   windowWidth *= 0.9;
 } else if (windowWidth >= 400 && windowWidth <= 765) {
@@ -20,11 +21,10 @@ if (windowWidth <= 400) {
 }
 
 export const CONFIG = {
-  API_URL: "http://localhost:4000/predict",
-  HEARTBEAT_URL: "http://localhost:4000/heartbeat",
   AGENT_CALL_FREQUENCY: 30,
   NO_PASSED_CARS_TIME_LIMIT: 1000,
   RANDOM_CAR_SPAWNING,
+  SAFETY_ZONE_ACTIVE,
   NUM_OF_SEQUENCES_FOR_WIN,
   CAR_SPAWN_SEQUENCE,
   // Static fields.

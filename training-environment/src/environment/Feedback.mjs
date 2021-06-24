@@ -1,3 +1,7 @@
+import { CONFIG } from "../config.mjs";
+
+const { NUM_OF_SEQUENCES_FOR_WIN, CAR_SPAWN_SEQUENCE, MAX_SPEED } = CONFIG;
+
 class State {
   constructor(stateList) {
     this.speed = stateList[0];
@@ -16,30 +20,38 @@ export class Feedback {
     const state = new State(stateList);
     const nextState = new State(nextStateList);
 
+    const maxPassedCars = NUM_OF_SEQUENCES_FOR_WIN * CAR_SPAWN_SEQUENCE.length;
+
     let sum = 0;
 
-    // -10 0
-    sum += traffic.stopped ? -10 : 0;
-    // 0 10
-    sum += traffic.won ? traffic.avgSpeed * 5 : 0;
+    // -maxPassedCars 0
+    sum += traffic.crashed ? traffic.passedCars - maxPassedCars : 0;
+    // 0 maxPassedCars * maxSpeed
+    sum += traffic.won ? traffic.avgSpeed * traffic.passedCars : 0;
 
-    const minValue = -10 + 0;
-    const maxValue = 0 + 10;
+    const maxValue = maxPassedCars * MAX_SPEED;
+    const minValue = -5 -maxPassedCars + 0;
 
     return Feedback.scaleFeedback(sum, minValue, maxValue);
   }
 
-  static generateAccelerationFeedback = (stateList, acceleration, nextStateList, crashed) => {
+  static generateAccelerationFeedback = (stateList, acceleration, nextStateList, traffic) => {
     const state = new State(stateList);
     const nextState = new State(nextStateList);
 
+    const maxPassedCars = NUM_OF_SEQUENCES_FOR_WIN * CAR_SPAWN_SEQUENCE.length;
+
     let sum = 0;
 
-    // -10 1
-    sum += crashed ? -10 : nextState.speed === 0 ? -5 : nextState.speed;
+    // -5 0
+    sum += traffic.stopped ? -5 : 0;
+    // -maxPassedCars 0
+    sum += traffic.crashed || traffic.stopped ? traffic.passedCars - maxPassedCars : 0;
+    // 0 maxPassedCars * maxSpeed
+    sum += traffic.won ? traffic.avgSpeed * traffic.passedCars : 0;
 
-    const minValue = -10;
-    const maxValue = 1;
+    const maxValue = 0 + maxPassedCars * MAX_SPEED;
+    const minValue = -5 -maxPassedCars + 0;
 
     return Feedback.scaleFeedback(sum, minValue, maxValue);
   }

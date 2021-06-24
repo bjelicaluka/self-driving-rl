@@ -16,7 +16,6 @@ export class PassingCar extends Car {
   }
 
   scanForCars = (cars) => {
-    this.carInFront = null;
     this.frontSensor.setInitialValues();
     if(this.carInFront) {
       if(this.frontSensor.safetyZoneActive) {

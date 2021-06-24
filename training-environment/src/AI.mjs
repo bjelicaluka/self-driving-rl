@@ -37,7 +37,7 @@ export class AI {
           state,
           action: [
             direction + 1,
-            acceleration * 10 + 0.5
+            acceleration / 0.05 + 1
           ],
           reward: [
             Feedback.generateDirectionFeedback(state, direction, nextState, this.traffic),
