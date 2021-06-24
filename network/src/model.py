@@ -23,7 +23,7 @@ class Model(object):
 
     def compile(self):
         self._model.compile(loss=MeanSquaredError(),
-                            optimizer=Adam(learning_rate=0.001, clipnorm=1.),
+                            optimizer=Adam(learning_rate=0.001),
                             metrics=['accuracy'])
 
     def fit(self, x, y, epochs=1, batch_size=1, verbose=1):

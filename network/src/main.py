@@ -10,7 +10,7 @@ frame = 0
 num_of_simulations = 1
 num_dir_actions = 3
 num_acc_actions = 2
-random_frames = 1
+random_frames = 500
 
 
 def epsilon(f):

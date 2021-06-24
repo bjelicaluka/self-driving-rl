@@ -1,14 +1,25 @@
 from threading import Thread
 import numpy as np
+import matplotlib.pyplot as plt
 
 from src.pubsub import RedisPubSub
 from src.replay_buffer import ReplayBuffer
 from src.model import ModelInstanceProvider, Model
 
+
+global ep, total_reward, total_frames
+ep = 0
+total_reward = 0
+total_frames = 0
 num_of_simulations = 1
+gamma = 0.99
+batch_size = 32
+final_rewards = []
+avg_rewards = []
 
 
 def handle_feedback(data):
+    global ep, total_reward, total_frames
     state = data['state']
     action = data['action']
     reward = data['reward']
@@ -16,9 +27,6 @@ def handle_feedback(data):
     terminal = 0 if data['done'] else 1
 
     buffer.add(state[1:7], action, reward, next_state[1:7], terminal)
-
-    gamma = 0.99
-    batch_size = 32
 
     states, actions, rewards, next_states, terminals = buffer.get_batch(batch_size)
 
@@ -34,16 +42,29 @@ def handle_feedback(data):
 
     q_model.fit(states, q_state, epochs=1, batch_size=1, verbose=1)
 
+    total_reward = total_reward + reward[0]
+    total_frames = total_frames + 1
+
     if data['done']:
-        target_model.set_weights(q_model.get_weights())
+        ep = ep + 1
+        final_rewards.append(reward[0])
+        avg_rewards.append(total_reward / total_frames)
+        total_frames = 0
+        total_reward = 0
+
+        plt.plot(range(ep), final_rewards)
+        plt.plot(range(ep), avg_rewards)
+        plt.show()
+
         ModelInstanceProvider.update_instance()
+        target_model.set_weights(q_model.get_weights())
 
 
 if __name__ == '__main__':
     ModelInstanceProvider.init(new_model=True)
     q_model = ModelInstanceProvider.get_instance()
 
-    buffer = ReplayBuffer(local=True, buffer_size=2000)
+    buffer = ReplayBuffer(local=True, buffer_size=5000)
 
     target_model = Model()
     target_model.compile()

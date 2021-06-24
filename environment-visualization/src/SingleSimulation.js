@@ -14,7 +14,8 @@ export default class SingleSimulation extends React.Component {
         super(props);
         this.trafficEventHandler = new TrafficEventHandler(this.props.simulationNamespaceId);
         this.state = {
-            speed: 1,
+            speed: 0,
+            avgSpeed: 0,
             passedCars: 0,
             showSensors: true,
             layers: []
@@ -28,8 +29,9 @@ export default class SingleSimulation extends React.Component {
         });
 
         this.trafficEventHandler.onTraffic(traffic => {
+            this.updateSpeed(traffic.speed);
+            this.updateAvgSpeed(traffic.avgSpeed);
             this.updatePassedCars(traffic.passedCars);
-            this.changeSpeed(traffic.speed);
             this.cars = traffic.cars.map(car => {
                 if (car.isAgent) {
                     Object.setPrototypeOf(car, Agent.prototype);
@@ -47,12 +49,16 @@ export default class SingleSimulation extends React.Component {
         this.setState({ showSensors: !this.state.showSensors });
     }
 
-    changeSpeed = (speed) => {
-        this.setState({ speed: speed })
+    updateSpeed = (speed) => {
+        this.setState({ speed })
+    }
+
+    updateAvgSpeed = (avgSpeed) => {
+        this.setState({ avgSpeed })
     }
 
     updatePassedCars = (passedCars) => {
-        this.setState({ passedCars: passedCars });
+        this.setState({ passedCars });
     }
 
     render() {
@@ -61,7 +67,8 @@ export default class SingleSimulation extends React.Component {
                 <div className="col-sm-12 col-md-3 col-lg-3">
                     <div className="col-12">
                         <ResultDisplay
-                            agentSpeed={this.state.speed}
+                            speed={this.state.speed}
+                            avgSpeed={this.state.avgSpeed}
                             passedCars={this.state.passedCars}
                             layers={this.state.layers}
                             showSensors={this.state.showSensors}

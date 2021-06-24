@@ -21,6 +21,10 @@ export class Traffic {
         this.noPassedCarsTimeLimit = NO_PASSED_CARS_TIME_LIMIT;
         this.stoppedFrames = 0;
 
+        this.totalSpeed = 0;
+        this.totalFrames = 0;
+        this.avgSpeed = 0;
+
         this.checkIfDone();
     }
 
@@ -44,6 +48,7 @@ export class Traffic {
             this.moveCars();
             this.removePassedCars();
         }
+        this.updateAvgSpeed();
         this.checkIfDone();
     }
 
@@ -75,5 +80,11 @@ export class Traffic {
         this.stopped = this.stoppedFrames >= 400 || this.crashed;
         this.won = this.passedCars === CAR_SPAWN_SEQUENCE.length * NUM_OF_SEQUENCES_FOR_WIN;
         this.done = this.won || this.stopped;
+    }
+
+    updateAvgSpeed = () => {
+        this.totalFrames++;
+        this.totalSpeed += this.speed;
+        this.avgSpeed = this.totalSpeed / this.totalFrames;
     }
 }

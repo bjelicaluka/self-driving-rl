@@ -18,16 +18,13 @@ export class Feedback {
 
     let sum = 0;
 
-    // -3 3
-    sum += (nextState.speed - state.speed) * 3;
-
     // -10 0
     sum += traffic.stopped ? -10 : 0;
     // 0 10
-    sum += traffic.won ? 10 : 0;
+    sum += traffic.won ? traffic.avgSpeed * 5 : 0;
 
-    const minValue = -3 -10 + 0;
-    const maxValue =  3 + 0 + 10;
+    const minValue = -10 + 0;
+    const maxValue = 0 + 10;
 
     return Feedback.scaleFeedback(sum, minValue, maxValue);
   }
