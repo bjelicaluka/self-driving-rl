@@ -9,7 +9,7 @@ frame = 0
 num_of_simulations = 1
 num_dir_actions = 3
 num_acc_actions = 3
-random_frames = 1
+random_frames = 2500
 
 
 def epsilon(f):
@@ -51,7 +51,7 @@ def handle_target_model_update(data):
 
 
 if __name__ == '__main__':
-    ModelInstanceProvider.init(new_model=False, file_path='saved-model')
+    ModelInstanceProvider.init(new_model=True)
 
     for i in range(num_of_simulations):
         pubsub_state = RedisPubSub()
