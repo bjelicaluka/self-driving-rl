@@ -16,7 +16,7 @@ export class AI {
 
     this.prevData = null;
 
-    this.init();
+    this.subscribeForActions();
   }
 
   think() {
@@ -24,37 +24,46 @@ export class AI {
 
       const nextState = this.traffic.agent.getSnapshot();
 
-      this.pubsub.publish(`state_${this.episodeId}`, {
-        state: nextState,
-        episode_id: this.episodeId
-      });
+      this.sendState(nextState);
+      
+      this.sendFeedback(nextState);
+      
       this.apiCallInterval = AGENT_CALL_FREQUENCY;
-
-      if(this.prevData) {
-        const { direction, acceleration, state } = this.prevData;
-
-        this.pubsub.publish(`feedback_${this.episodeId}`, {
-          state,
-          action: [
-            direction + 1,
-            acceleration / 0.05 + 1
-          ],
-          reward: [
-            Feedback.generateDirectionFeedback(state, direction, nextState, this.traffic),
-            Feedback.generateAccelerationFeedback(state, acceleration, nextState, this.traffic),
-          ],
-          next_state: nextState,
-          done: !!this.traffic.done,
-          passed_cars: this.traffic.passedCars
-        });
-      }
-
       return true;
     }
     return false;
   }
 
-  init() {
+  sendState(nextState) {
+    this.pubsub.publish(`state_${this.episodeId}`, {
+      state: nextState,
+      episode_id: this.episodeId
+    });
+  }
+
+
+  sendFeedback(nextState) {
+    if (this.prevData) {
+      const { direction, acceleration, state } = this.prevData;
+
+      this.pubsub.publish(`feedback_${this.episodeId}`, {
+        state,
+        action: [
+          direction + 1,
+          acceleration / 0.05 + 1
+        ],
+        reward: [
+          Feedback.generateDirectionFeedback(state, direction, nextState, this.traffic),
+          Feedback.generateAccelerationFeedback(state, acceleration, nextState, this.traffic),
+        ],
+        next_state: nextState,
+        done: !!this.traffic.done,
+        passed_cars: this.traffic.passedCars
+      });
+    }
+  }
+
+  subscribeForActions() {
     this.pubsub.subscribe(`action_${this.episodeId}`, data => {
       const { direction, acceleration } = data;
 

@@ -1,7 +1,7 @@
 from collections import deque
 import numpy as np
 import json
-from src.pubsub import RedisPubSub
+from src.components.pubsub import RedisPubSub
 
 
 class ReplayBuffer(object):

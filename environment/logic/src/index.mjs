@@ -3,7 +3,7 @@ import { SocketIOServer } from './events/SocketIOServer.mjs';
 import { AI } from './AI.mjs';
 import { Traffic } from './environment/Traffic.mjs';
 
-const NUMBER_OF_SIMULATIONS = 1;
+const NUMBER_OF_SIMULATIONS = 2;
 
 const initialInfo = {
   speed: 1,
