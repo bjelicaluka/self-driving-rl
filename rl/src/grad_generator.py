@@ -1,8 +1,9 @@
-import random
-from threading import Thread
-import tensorflow as tf
-import numpy as np
+import sys
 import json
+import numpy as np
+import tensorflow as tf
+
+from threading import Thread
 
 from src.components.global_model import GlobalModelInstance
 from src.components.pubsub import RedisPubSub
@@ -69,12 +70,12 @@ def emit_episode_end(score):
 
 
 def subscribe_for_feedback():
-    thread = Thread(target=pubsub.subscribe, args=(f'feedback_{worker_id}', handle_feedback,), daemon=False)
+    thread = Thread(target=pubsub.subscribe, args=(f'feedback_{simulation_id}', handle_feedback,), daemon=False)
     thread.start()
 
 
 if __name__ == '__main__':
-    worker_id = input("Worker ID: ")
+    simulation_id = sys.argv[1]
 
     global_q_model = GlobalModelInstance('q')
     global_target_model = GlobalModelInstance('target')

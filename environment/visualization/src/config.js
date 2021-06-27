@@ -8,7 +8,7 @@ if(windowWidth <= 400) {
 }
 
 export let CONFIG = {
-    HEARTBEAT_URL: "http://localhost:4000/heartbeat",
+    WS_API_URL: 'http://localhost:4001'
 }
 
 export function setConfig(config) {

@@ -1,9 +1,12 @@
 import { SocketIOClient } from "./SocketIOClient";
+import { CONFIG } from '../config'
+
+const { WS_API_URL } = CONFIG;
 
 export class TrafficEventHandler extends SocketIOClient {
 
   constructor(id) {
-    super(`http://localhost:4001`, id);
+    super(`${WS_API_URL}`, id);
 
     this.addEventListener('connect', () => {
       console.log("Connected to Traffic live emitter.");

@@ -1,10 +1,11 @@
+import sys
+import json
+import numpy as np
 from collections import defaultdict
 from threading import Thread
 
 from src.components.global_model import GlobalModelInstance
 from src.components.pubsub import RedisPubSub
-import numpy as np
-import json
 
 num_of_simulations = 2
 num_dir_actions = 3
@@ -45,12 +46,14 @@ def act(data, pubsub_, index):
 
 
 if __name__ == '__main__':
+    simulation_id = sys.argv[1]
+    print(simulation_id)
     global_model = GlobalModelInstance('target')
     global_model.init()
 
-    for i in range(num_of_simulations):
-        pubsub = RedisPubSub()
-        action_thread = Thread(target=pubsub.subscribe, args=(f'state_{i}', act, pubsub, i,), daemon=False)
-        action_thread.start()
+    pubsub = RedisPubSub()
+    action_thread = Thread(target=pubsub.subscribe, 
+        args=(f'state_{simulation_id}', act, pubsub, int(simulation_id),), daemon=False)
+    action_thread.start()
 
     global_model.subscribe_for_model_updates()

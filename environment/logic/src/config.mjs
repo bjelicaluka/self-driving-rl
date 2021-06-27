@@ -1,3 +1,5 @@
+const NUMBER_OF_SIMULATIONS = 2;
+
 const NUM_OF_LANES = 10;
 const MAX_SPEED = 2;
 const CARS_TO_CREATE = 2;
@@ -21,6 +23,7 @@ if (windowWidth <= 400) {
 }
 
 export const CONFIG = {
+  NUMBER_OF_SIMULATIONS,
   AGENT_CALL_FREQUENCY: 30,
   NO_PASSED_CARS_TIME_LIMIT: 1000,
   RANDOM_CAR_SPAWNING,
