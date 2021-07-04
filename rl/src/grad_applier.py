@@ -13,7 +13,7 @@ def handle_gradients(data):
     gradients = string_to_gradients(data['gradients'])
 
     lock.acquire()
-    global_q_model.get_model().apply_gradients(gradients, discount_factor=1)
+    global_q_model.get_model().apply_gradients(gradients, discount_factor=0.01)
     global_q_model.commit()
     lock.release()
 
@@ -33,7 +33,7 @@ def handle_episode_end(data):
 
     update_best_model(score, weights)
 
-    if episodes_finished % 1 == 0:
+    if episodes_finished % 10 == 0:
         sync_target_and_q_models()
         global_target_model.commit()
 

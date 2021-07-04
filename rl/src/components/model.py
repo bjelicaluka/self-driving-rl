@@ -9,13 +9,14 @@ class Model(object):
 
     def __init__(self) -> None:
         super().__init__()
-        self._optimizer = Adam(learning_rate=0.0001)
+        self._optimizer = Adam()
         self._loss_fn = MeanSquaredError()
 
         state_input = Input(shape=(6,))
 
         hidden_for_dir = Dense(32, activation='relu')(state_input)
         hidden_for_acc = Dense(32, activation='relu')(state_input)
+
         dir_output = Dense(3, activation='linear')(hidden_for_dir)
         acc_output = Dense(3, activation='linear')(hidden_for_acc)
 

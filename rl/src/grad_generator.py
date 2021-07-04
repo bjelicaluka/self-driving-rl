@@ -14,7 +14,7 @@ from src.utils.weights import weights_to_string
 total_reward = 0
 total_frames = 0
 gamma = 0.99
-batch_size = 64
+batch_size = 256
 
 
 def handle_feedback(data):
@@ -40,7 +40,7 @@ def generate_gradients():
     global_q_model.sync()
     q_model = global_q_model.get_model()
     target_model = global_target_model.get_model()
-
+    # povecaj batch size
     states, actions, rewards, next_states, terminals = buffer.get_batch(batch_size)
     actions = actions.reshape(len(actions), 2)
 
@@ -49,7 +49,7 @@ def generate_gradients():
 
     dir_indices, acc_indices = actions[:, 0], actions[:, 1]
     next_dir_indices, next_acc_indices = np.argmax(q_next_states[0], axis=1), np.argmax(q_next_states[1], axis=1)
-
+    # reward od -1 do 1
     q_states[0][:, dir_indices] = rewards[:, 0] + gamma * q_next_states[0][:, next_dir_indices] * terminals
     q_states[1][:, acc_indices] = rewards[:, 1] + gamma * q_next_states[1][:, next_acc_indices] * terminals
 
