@@ -1,4 +1,4 @@
-const NUMBER_OF_SIMULATIONS = 2;
+const NUMBER_OF_SIMULATIONS = 1;
 
 const NUM_OF_LANES = 10;
 const MAX_SPEED = 2;
