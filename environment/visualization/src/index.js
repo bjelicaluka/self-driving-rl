@@ -9,7 +9,7 @@ export default class MainWindow extends React.Component {
         const numberOfSimulations = pathname.substr(1, pathname.length - 1);
         const simulationIds = [];
         for (let i = 0; i < numberOfSimulations; i++) {
-            simulationIds.push(`/${i}`);
+            simulationIds.push(i);
         }
         this.state = {
             simulationIds

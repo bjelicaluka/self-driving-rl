@@ -3,7 +3,7 @@ import { SocketIOServer } from './events/SocketIOServer.mjs';
 import { AI } from './AI.mjs';
 import { Traffic } from './environment/Traffic.mjs';
 
-const { NUMBER_OF_SIMULATIONS } = CONFIG;
+const { NUMBER_OF_SIMULATIONS, LOGGING } = CONFIG;
 
 const initialInfo = {
   speed: 1,
@@ -111,7 +111,7 @@ function main() {
   for (let i = 0; i < NUMBER_OF_SIMULATIONS; i++) {
     run();
   }
-  setInterval(logInfo, 1);
+  LOGGING && setInterval(logInfo, 1);
 }
 
 main();

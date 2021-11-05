@@ -1,3 +1,4 @@
+import os
 from redis import Redis
 import json
 
@@ -5,7 +6,8 @@ import json
 class RedisPubSub(object):
 
     def __init__(self):
-        self.publisher = Redis(host='localhost', port=6379, password='1234')
+        self.publisher = Redis(host=os.environ.get('REDIS_HOST', 'localhost'), \
+            port=os.environ.get('REDIS_PORT', 6379), password=os.environ.get('REDIS_PASSWORD', ''))
         self.subscriber = self.publisher.pubsub()
 
     def publish(self, channel, message):

@@ -1,0 +1,85 @@
+version: "3"
+services:
+
+  actor_1:
+    image: ${RL_IMAGE}
+    command: python -m src.actor 0
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - grad_applier
+      - redis
+  
+  grad_generator_1:
+    image: ${RL_IMAGE}
+    command: python -m src.grad_generator 0
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - grad_applier
+      - redis
+
+  actor_2:
+    image: ${RL_IMAGE}
+    command: python -m src.actor 1
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - grad_applier
+      - redis
+  
+  grad_generator_2:
+    image: ${RL_IMAGE}
+    command: python -m src.grad_generator 1
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - grad_applier
+      - redis
+
+  grad_applier:
+    image: ${RL_IMAGE}
+    command: python -m src.grad_applier
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+
+  self_driving_env:
+    image: ${SELF_DRIVING_ENV_IMAGE}
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PORT=${WS_PORT}
+      - LOGGING=false
+      - NUMBER_OF_SIMULATIONS=2
+    depends_on:
+      - redis
+    ports:
+        - "${WS_PORT}:${WS_PORT}"
+
+  self_driving_visualization:
+    image: ${SELF_DRIVING_VISUALIZATION_IMAGE}
+    environment:
+      - API_HOSTNAME=localhost
+      - API_PROTOCOL=http
+      - API_PORT=${WS_PORT}
+      - API_PATH=/
+      - SAME_HOST=true
+    depends_on:
+      - self_driving_env
+    ports:
+      - "5052:80"
+
+  redis:
+    image: redis:rc-alpine
+    command: redis-server --appendonly yes
+
+networks:
+  default:
+    driver: bridge

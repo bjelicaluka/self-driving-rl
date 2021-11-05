@@ -1,14 +1,11 @@
 import redis from "redis";
+import { REDIS_CONFIG } from "../config.mjs";
 
 export class RedisPubSub {
 
   constructor() {
-    this.subscriber = redis.createClient({
-      password: '1234'
-    });
-    this.publisher = redis.createClient({
-      password: '1234'
-    });
+    this.subscriber = redis.createClient(REDIS_CONFIG);
+    this.publisher = redis.createClient(REDIS_CONFIG);
   }
 
   publish(channel, data) {

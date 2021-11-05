@@ -6,7 +6,7 @@ import { Server } from 'socket.io';
 
 const io = new Server(server);
 
-server.listen(4001, () => {
+server.listen(process.env.PORT || 4001, () => {
   console.log('Started listening.');
 });
 
