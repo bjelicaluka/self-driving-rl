@@ -5,16 +5,20 @@ from src.components.global_model import GlobalModelInstance
 from src.components.pubsub import RedisPubSub
 from src.utils.gradients import string_to_gradients
 
+# Parameters
+target_model_sync_frequency = 10
+learning_rate = 0.01
+
+# Plot utils
 episodes_finished = 0
 final_rewards = []
-target_model_sync_frequency = 10
 
 
 def handle_gradients(data):
     gradients = string_to_gradients(data['gradients'])
 
     lock.acquire()
-    global_q_model.get_model().apply_gradients(gradients, discount_factor=0.01)
+    global_q_model.get_model().apply_gradients(gradients, discount_factor=learning_rate)
     global_q_model.commit()
     lock.release()
 
@@ -49,7 +53,6 @@ def update_best_model(score, weights):
 
 
 def sync_target_and_q_models():
-    # TODO: razmisliti da li pomnoziti q tezine sa nekim koeficijentom
     global_target_model.get_model().set_weights(global_q_model.get_model().get_weights())
 
 

@@ -7,10 +7,12 @@ from threading import Thread
 from src.components.global_model import GlobalModelInstance
 from src.components.pubsub import RedisPubSub
 
-num_of_simulations = 2
+# Params
+random_frames = 5000
+
+# Plot uitls
 num_dir_actions = 3
 num_acc_actions = 3
-random_frames = 5000
 frames_count = defaultdict(lambda: 0)
 
 

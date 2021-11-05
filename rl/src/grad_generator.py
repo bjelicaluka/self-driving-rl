@@ -11,10 +11,14 @@ from src.components.replay_buffer import ReplayBuffer
 from src.utils.gradients import gradients_to_string
 from src.utils.weights import weights_to_string
 
-total_reward = 0
-total_frames = 0
+# Params
 gamma = 0.99
 batch_size = 1024
+replay_buffer_size = 10000
+
+# Plot utils
+total_reward = 0
+total_frames = 0
 
 
 def handle_feedback(data):
@@ -81,7 +85,7 @@ if __name__ == '__main__':
     global_q_model.init()
     global_target_model.init()
 
-    buffer = ReplayBuffer(local=True, buffer_size=10000)
+    buffer = ReplayBuffer(local=True, buffer_size=replay_buffer_size)
     pubsub = RedisPubSub()
 
     subscribe_for_feedback()

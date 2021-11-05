@@ -26,3 +26,37 @@
 2. Configure parameters in `src/config.js`.
 3. `npm start` to run in development environment
 4. `npm run build` and serve the static files through HTTP server e.g. `serve -s build/`
+
+## Parameters
+
+### Environment
+
+- Number of simulations in process
+- Agent call frequency
+- Max speed
+- Number of lanes
+- Number of cars to create at once
+- Are cars spawned randomly or Car sequence and number of wawes for the win
+
+### Actor
+
+- Number of random frames (for epsilon greedy policy)
+
+### Model
+
+- Network architecture
+- Optimizer
+- Activations fns
+- Loss fn
+
+### Gradient Generator
+
+- Gamma - discount factor in MDP (it determines how much do we take into account the future)
+- Batch size - number of samples from replay buffer
+- Replay buffer size
+
+### Gradient Applier
+
+- Learning rate
+- Target model sync frequency - required number of episodes for target and q model synchronization
+- Consider adding a const parameter for updating weights - hard/soft update of network params 
