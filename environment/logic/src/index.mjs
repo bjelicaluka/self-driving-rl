@@ -74,6 +74,7 @@ function run() {
   setInterval(() => {
     // Run environment
     traffic.simulate();
+    // Info for logging only - not important
     updateSpeed(index);
 
     // Call the agent

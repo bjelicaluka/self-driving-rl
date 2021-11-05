@@ -7,6 +7,7 @@ from src.utils.gradients import string_to_gradients
 
 episodes_finished = 0
 final_rewards = []
+target_model_sync_frequency = 10
 
 
 def handle_gradients(data):
@@ -33,7 +34,7 @@ def handle_episode_end(data):
 
     update_best_model(score, weights)
 
-    if episodes_finished % 10 == 0:
+    if episodes_finished % target_model_sync_frequency == 0:
         sync_target_and_q_models()
         global_target_model.commit()
 
@@ -48,6 +49,7 @@ def update_best_model(score, weights):
 
 
 def sync_target_and_q_models():
+    # TODO: razmisliti da li pomnoziti q tezine sa nekim koeficijentom
     global_target_model.get_model().set_weights(global_q_model.get_model().get_weights())
 
 
