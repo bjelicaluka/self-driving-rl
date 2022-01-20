@@ -1,9 +1,13 @@
+import os
+from datetime import datetime
 from threading import Thread, Lock
 import matplotlib.pyplot as plt
 
 from src.components.global_model import GlobalModelInstance
 from src.components.pubsub import RedisPubSub
 from src.utils.gradients import string_to_gradients
+
+import requests
 
 # Parameters
 target_model_sync_frequency = 10
@@ -24,6 +28,7 @@ def handle_gradients(data):
 
 
 def handle_episode_end(data):
+    simulation_id = data['simulation_id']
     score = float(data['score'])
     weights = data['weights']
 
@@ -33,8 +38,18 @@ def handle_episode_end(data):
     final_rewards.append(score)
 
     plt.plot(range(episodes_finished), final_rewards)
-    plt.savefig('plt.png')
+    plt.savefig(f'plt_{simulation_id}.png')
     plt.close()
+
+    print(f"POST to {os.environ['API_URL']} score: {score} simid: {simulation_id}")
+    r = requests.post(os.environ['API_URL'], json = {
+        "apiToken": os.environ[f'API_TOKEN_{simulation_id}'],
+        "createdAt": datetime.now().isoformat(),
+        "record": {
+            "reward": score,
+        }
+    })
+    print(r.json())
 
     update_best_model(score, weights)
 

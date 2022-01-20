@@ -68,7 +68,7 @@ def generate_gradients():
 
 def emit_episode_end(score):
     weights = weights_to_string(global_target_model.get_model().get_weights())
-    pubsub.publish('episode_end', json.dumps({'score': float(score), 'weights': weights}))
+    pubsub.publish('episode_end', json.dumps({'score': float(score), 'weights': weights, 'simulation_id': simulation_id}))
 
 
 def subscribe_for_feedback():
