@@ -64,7 +64,7 @@ services:
     depends_on:
       - redis
     ports:
-        - "${WS_PORT}:${WS_PORT}"
+      - "${WS_PORT}:${WS_PORT}"
 
   self_driving_visualization:
     image: ${SELF_DRIVING_VISUALIZATION_IMAGE}

@@ -4,4 +4,4 @@ WORKDIR /app
 
 COPY . .
 
-RUN pip3 install redis matplotlib
+RUN pip3 install redis matplotlib pytz

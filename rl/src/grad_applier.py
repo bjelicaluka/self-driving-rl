@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+import pytz
 from threading import Thread, Lock
 import matplotlib.pyplot as plt
 
@@ -44,7 +45,7 @@ def handle_episode_end(data):
     print(f"POST to {os.environ['API_URL']} score: {score} simid: {simulation_id}")
     r = requests.post(os.environ['API_URL'], json = {
         "apiToken": os.environ[f'API_TOKEN_{simulation_id}'],
-        "createdAt": datetime.now().isoformat(),
+        "createdAt": datetime.now(pytz.timezone("Europe/Belgrade")).isoformat(),
         "record": {
             "reward": score,
         }
