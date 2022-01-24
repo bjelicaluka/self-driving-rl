@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@jsonforms/core": "^2.5.2",
     "@jsonforms/react": "^2.5.2",
     "@jsonforms/vanilla-renderers": "^2.5.2",
     "axios": "^0.21.1",
