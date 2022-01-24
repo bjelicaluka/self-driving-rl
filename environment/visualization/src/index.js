@@ -20,10 +20,10 @@ export default class MainWindow extends React.Component {
     render() {
         return (
             <div>
-                <ParamsInputForm />
                 {this.state.simulationIds.map((simulationNamespaceId, i) => 
                     <SingleSimulation key={i} simulationNamespaceId={simulationNamespaceId} />
                 )}
+                <ParamsInputForm />
             </div>
         );
     }
