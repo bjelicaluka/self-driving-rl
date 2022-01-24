@@ -75,12 +75,15 @@ def handle_episode_end(data):
 
 
 def update_best_model(score, weights):
+    global target_model_sync_frequency
     best_score = episode_end_pubsub.publisher.get('best_score')
     print("Score: {}, Best score: {}".format(score, float(best_score) if best_score is not None else 0))
     if best_score is None or score > float(best_score):
         print("New best is set!")
         episode_end_pubsub.publisher.set('best_score', str(score))
         episode_end_pubsub.publisher.set('best_weights', weights)
+    if score > 0.5 and score > float(best_score):
+        target_model_sync_frequency *= 10
 
 
 def sync_target_and_q_models():
