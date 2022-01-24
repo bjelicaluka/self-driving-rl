@@ -85,6 +85,10 @@ services:
       - API_PORT=${WS_PORT}
       - API_PATH=/
       - SAME_HOST=true
+      - PARAMS_API_HOSTNAME=${PARAMS_API_HOSTNAME}
+      - PARAMS_API_PROTOCOL=${PARAMS_API_PROTOCOL}
+      - PARAMS_API_PORT=${PARAMS_API_PORT}
+      - PARAMS_API_PATH=${PARAMS_API_PATH}
     depends_on:
       - self_driving_env
     ports:
