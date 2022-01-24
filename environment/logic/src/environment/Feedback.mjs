@@ -58,6 +58,6 @@ export class Feedback {
 
 
   static scaleFeedback(sum, minValue, maxValue) {
-    return ((sum - minValue) / (maxValue - minValue)) * 2 - 1;
+    return ((sum - minValue) / (maxValue - minValue));
   }
 }
