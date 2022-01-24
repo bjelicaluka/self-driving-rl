@@ -53,6 +53,17 @@ services:
     depends_on:
       - redis
 
+  params_handler:
+    image: ${RL_IMAGE}
+    command: python -m src.params_handler
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+    ports:
+      - "5053:5000"
+
   self_driving_env:
     image: ${SELF_DRIVING_ENV_IMAGE}
     environment:

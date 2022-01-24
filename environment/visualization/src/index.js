@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import { ParamsInputForm } from "./components/input-forms/ParamsInputForm";
 import SingleSimulation from "./SingleSimulation";
 
 export default class MainWindow extends React.Component {
@@ -19,10 +20,10 @@ export default class MainWindow extends React.Component {
     render() {
         return (
             <div>
+                <ParamsInputForm />
                 {this.state.simulationIds.map((simulationNamespaceId, i) => 
                     <SingleSimulation key={i} simulationNamespaceId={simulationNamespaceId} />
                 )}
-
             </div>
         );
     }

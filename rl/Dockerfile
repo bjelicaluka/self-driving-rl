@@ -4,4 +4,4 @@ WORKDIR /app
 
 COPY . .
 
-RUN pip3 install redis matplotlib pytz
+RUN pip3 install redis matplotlib pytz Flask

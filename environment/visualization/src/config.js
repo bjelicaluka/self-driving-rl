@@ -12,8 +12,11 @@ const API_URL = window._env_.SAME_HOST === 'true' ?
   :
   `${window._env_.API_PROTOCOL}://${window._env_.API_HOSTNAME}:${window._env_.API_PORT}${window._env_.API_PATH}`
 
+const PARAMS_API_URL = `${window._env_.PARAMS_API_PROTOCOL}://${window._env_.PARAMS_API_HOSTNAME}:${window._env_.PARAMS_API_PORT}${window._env_.PARAMS_API_PATH}`
+
 export let CONFIG = {
-    WS_API_URL: API_URL
+    WS_API_URL: API_URL,
+    PARAMS_API_URL
 }
 
 export function setConfig(config) {

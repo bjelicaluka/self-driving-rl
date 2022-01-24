@@ -15,10 +15,26 @@ from src.utils.weights import weights_to_string
 gamma = 0.99
 batch_size = 1024
 replay_buffer_size = 10000
+replay_buffer_local = True
 
 # Plot utils
 total_reward = 0
 total_frames = 0
+
+
+def handle_params(data):
+    global gamma, batch_size, replay_buffer_size, replay_buffer_local, buffer
+    if 'gamma' in data:
+        gamma = float(data['gamma'])
+    if 'batch_size' in data:
+        batch_size = int(data['batch_size'])
+    if 'replay_buffer_size' in data:
+        replay_buffer_size = int(data['replay_buffer_size'])
+    if 'replay_buffer_local' in data:
+        replay_buffer_local = data['replay_buffer_local'].lower() in ['true', '1']
+    print(f"Updated params: gamma={gamma}, batch_size={batch_size}, replay_buffer_size={replay_buffer_size}, replay_buffer_local={replay_buffer_local}.")
+    if 'reset_buffer' in data:
+        buffer = ReplayBuffer(local=replay_buffer_local, replay_buffer_size=replay_buffer_size)
 
 
 def handle_feedback(data):
@@ -85,8 +101,12 @@ if __name__ == '__main__':
     global_q_model.init()
     global_target_model.init()
 
-    buffer = ReplayBuffer(local=True, buffer_size=replay_buffer_size)
+    buffer = ReplayBuffer(local=replay_buffer_local, buffer_size=replay_buffer_size)
     pubsub = RedisPubSub()
+    params_pubsub = RedisPubSub()
 
     subscribe_for_feedback()
     global_target_model.subscribe_for_model_updates()
+
+    params_thread = Thread(target=params_pubsub.subscribe, args=(f'params', handle_params,), daemon=False)
+    params_thread.start()

@@ -16,6 +16,16 @@ num_acc_actions = 3
 frames_count = defaultdict(lambda: 0)
 
 
+def handle_params(data):
+    global random_frames, index
+    if 'random_frames' in data:
+        random_frames = int(data['random_frames'])
+    print(f"Updated params: random_frames={random_frames}.")
+    if 'reset' in data and data['reset'].lower() in ['true', '1']:
+        for k in frames_count:
+            frames_count[k] = 0
+
+
 def epsilon(f):
     return f / random_frames
 
@@ -54,8 +64,11 @@ if __name__ == '__main__':
     global_model.init()
 
     pubsub = RedisPubSub()
+    params_pubsub = RedisPubSub()
     action_thread = Thread(target=pubsub.subscribe, 
         args=(f'state_{simulation_id}', act, pubsub, int(simulation_id),), daemon=False)
+    params_thread = Thread(target=params_pubsub.subscribe, args=(f'params', handle_params,), daemon=False)
     action_thread.start()
+    params_thread.start()
 
     global_model.subscribe_for_model_updates()

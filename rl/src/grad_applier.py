@@ -19,6 +19,21 @@ episodes_finished = 0
 final_rewards = []
 
 
+def handle_params(data):
+    global target_model_sync_frequency, learning_rate
+    if 'target_model_sync_frequency' in data:
+        target_model_sync_frequency = int(data['target_model_sync_frequency'])
+    if 'learning_rate' in data:
+        learning_rate = float(data['learning_rate'])
+    print(f"Updated params: target_model_sync_frequency={target_model_sync_frequency}, learning_rate={learning_rate}.")
+    if 'reset' in data and data['reset'].lower() in ['true', '1']:
+        print('Reseting q and target models.')
+        global_q_model.init(new_model=True)
+        global_q_model.commit()
+        global_target_model.init(new_model=True)
+        global_target_model.commit()
+
+
 def handle_gradients(data):
     gradients = string_to_gradients(data['gradients'])
 
@@ -88,10 +103,13 @@ if __name__ == '__main__':
 
     grad_pubsub = RedisPubSub()
     episode_end_pubsub = RedisPubSub()
+    params_pubsub = RedisPubSub()
 
     grad_thread = Thread(target=grad_pubsub.subscribe, args=(f'gradients', handle_gradients,), daemon=False)
     episode_end_thread = Thread(target=episode_end_pubsub.subscribe, args=(f'episode_end', handle_episode_end,),
                                 daemon=False)
+    params_thread = Thread(target=params_pubsub.subscribe, args=(f'params', handle_params,), daemon=False)
 
     grad_thread.start()
     episode_end_thread.start()
+    params_thread.start()
