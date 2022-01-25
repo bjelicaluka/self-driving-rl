@@ -53,7 +53,7 @@ def handle_feedback(data):
     total_frames = total_frames + 1
 
     if data['done']:
-        emit_episode_end(np.mean(reward))
+        emit_episode_end(np.mean(reward), reward)
 
 
 def generate_gradients():
@@ -82,9 +82,9 @@ def generate_gradients():
     pubsub.publish('gradients', json.dumps({'gradients': gradients_to_string(gradients)}))
 
 
-def emit_episode_end(score):
+def emit_episode_end(score, reward):
     weights = weights_to_string(global_target_model.get_model().get_weights())
-    pubsub.publish('episode_end', json.dumps({'score': float(score), 'weights': weights, 'simulation_id': simulation_id}))
+    pubsub.publish('episode_end', json.dumps({'score': float(score), 'weights': weights, 'simulation_id': simulation_id, 'reward': reward}))
 
 
 def subscribe_for_feedback():

@@ -24,13 +24,14 @@ export class Feedback {
 
     let sum = 0;
 
-    // -maxPassedCars 0
-    sum += traffic.crashed ? traffic.passedCars - maxPassedCars : 0;
-    // 0 maxPassedCars * maxSpeed
-    sum += traffic.won ? traffic.avgSpeed * traffic.passedCars : 0;
+    // 0 (maxPassedCars * maxSpeed)
+    sum += traffic.crashed ? traffic.avgSpeed * traffic.passedCars : 0;
+    // 0 1
+    const wonAward = 1;
+    sum += traffic.won ? wonAward : 0;
 
-    const maxValue = maxPassedCars * MAX_SPEED;
-    const minValue = -5 -maxPassedCars + 0;
+    const maxValue = 0 + maxPassedCars * MAX_SPEED + wonAward;
+    const minValue = 0;
 
     return Feedback.scaleFeedback(sum, minValue, maxValue);
   }
@@ -43,15 +44,17 @@ export class Feedback {
 
     let sum = 0;
 
-    // -5 0
-    sum += traffic.stopped ? -5 : 0;
-    // -maxPassedCars 0
-    sum += traffic.crashed || traffic.stopped ? traffic.passedCars - maxPassedCars : 0;
-    // 0 maxPassedCars * maxSpeed
-    sum += traffic.won ? traffic.avgSpeed * traffic.passedCars : 0;
+    // -1 0
+    const stopPunishment = -1;
+    sum += traffic.stopped ? stopPunishment : 0;
+    // 0 (maxPassedCars * maxSpeed)
+    sum += traffic.crashed ? traffic.avgSpeed * traffic.passedCars : 0;
+    // 0 1
+    const wonAward = 1;
+    sum += traffic.won ? wonAward : 0;
 
-    const maxValue = 0 + maxPassedCars * MAX_SPEED;
-    const minValue = -5 -maxPassedCars + 0;
+    const maxValue = 0 + maxPassedCars * MAX_SPEED + wonAward;
+    const minValue = stopPunishment + 0;
 
     return Feedback.scaleFeedback(sum, minValue, maxValue);
   }

@@ -46,6 +46,7 @@ def handle_gradients(data):
 def handle_episode_end(data):
     simulation_id = data['simulation_id']
     score = float(data['score'])
+    reward = data['reward']
     weights = data['weights']
 
     global episodes_finished
@@ -57,12 +58,14 @@ def handle_episode_end(data):
     plt.savefig(f'plt_{simulation_id}.png')
     plt.close()
 
-    print(f"POST to {os.environ['API_URL']} score: {score} simid: {simulation_id}")
+    print(f"POST to {os.environ['API_URL']} score: {score} simid: {simulation_id} reward: {reward}")
     r = requests.post(os.environ['API_URL'], json = {
         "apiToken": os.environ[f'API_TOKEN_{simulation_id}'],
         "createdAt": datetime.now(pytz.timezone("Europe/Belgrade")).isoformat(),
         "record": {
             "reward": score,
+            "dirReward": float(reward[0]),
+            "accReward": float(reward[1])
         }
     })
     print(r.json())
